@@ -388,12 +388,27 @@ void IndexNSG::Link(const Parameters &parameters, SimpleNeighbor *cut_graph_) {
 void IndexNSG::Build(size_t n, const float *data, const Parameters &parameters) {
   std::string nn_graph_path = parameters.Get<std::string>("nn_graph_path");
   unsigned range = parameters.Get<unsigned>("R");
+    // Added by Johnpzh
+    time_load_graph = -omp_get_wtime();
+    // Ended by Johnpzh
   Load_nn_graph(nn_graph_path.c_str());
+    // Added by Johnpzh
+    time_load_graph += omp_get_wtime();
+    time_init_graph = -omp_get_wtime();
+    // Ended by Johnpzh
   data_ = data;
   init_graph(parameters);
+    // Added by Johnpzh
+    time_init_graph += omp_get_wtime();
+    time_link = -omp_get_wtime();
+    // Ended by Johnpzh
   SimpleNeighbor *cut_graph_ = new SimpleNeighbor[nd_ * (size_t)range];
   Link(parameters, cut_graph_);
   final_graph_.resize(nd_);
+    // Added by Johnpzh
+    time_link += omp_get_wtime();
+    time_mrng = -omp_get_wtime();
+    // Ended by Johnpzh
 
   for (size_t i = 0; i < nd_; i++) {
     SimpleNeighbor *pool = cut_graph_ + i * (size_t)range;
@@ -408,8 +423,16 @@ void IndexNSG::Build(size_t n, const float *data, const Parameters &parameters) 
       final_graph_[i][j] = pool[j].id;
     }
   }
+  // Added by Johnpzh
+  time_mrng += omp_get_wtime();
+  time_tree_grow = -omp_get_wtime();
+  // Ended by Johnpzh
 
   tree_grow(parameters);
+
+  // Added by Johnpzh
+  time_tree_grow += omp_get_wtime();
+  // Ended by Johnpzh
 
   unsigned max = 0, min = 1e6, avg = 0;
   for (size_t i = 0; i < nd_; i++) {
