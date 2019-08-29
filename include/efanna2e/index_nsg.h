@@ -40,6 +40,16 @@ class IndexNSG : public Index {
       unsigned *indices);
   void OptimizeGraph(float* data);
 
+  // For profiling.
+    // Added by Johnpzh
+//    double time_medoid;
+    double time_load_graph;
+    double time_init_graph;
+    double time_link;
+    double time_mrng;
+    double time_tree_grow;
+    // Ended by Johnpzh
+
   protected:
     typedef std::vector<std::vector<unsigned > > CompactGraph;
     typedef std::vector<SimpleNeighbors > LockGraph;

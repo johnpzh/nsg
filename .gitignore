@@ -1,1 +1,14 @@
 build/
+
+# Build
+cmake-build-*/
+
+# Clion
+.idea/
+
+# Output files
+*.nsg
+*.txt
+
+# Data files
+*.ivecs

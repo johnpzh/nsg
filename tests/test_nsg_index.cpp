@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
   auto e = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = e - s;
 
-  std::cout << "indexing time: " << diff.count() << "\n";
+  std::cout << "indexing_time: " << diff.count() << "\n";
   index.Save(argv[6]);
 
   return 0;
