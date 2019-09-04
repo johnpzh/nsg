@@ -450,19 +450,21 @@ void IndexNSG::Build(size_t n, const float *data, const Parameters &parameters) 
 void IndexNSG::Search(const float *query, const float *x, size_t K,
                       const Parameters &parameters, unsigned *indices) {
   const unsigned L = parameters.Get<unsigned>("L_search");
-  data_ = x;
-  std::vector<Neighbor> retset(L + 1);
-  std::vector<unsigned> init_ids(L);
-  boost::dynamic_bitset<> flags{nd_, 0};
+  data_ = x; // Base data
+  std::vector<Neighbor> retset(L + 1); // Return set
+  std::vector<unsigned> init_ids(L); // Store initial candidates (vertex IDs)
+  boost::dynamic_bitset<> flags{nd_, 0}; // Check flags
   // std::mt19937 rng(rand());
   // GenRandom(rng, init_ids.data(), L, (unsigned) nd_);
 
+  // Store ep_'s neighbors as candidates
   unsigned tmp_l = 0;
   for (; tmp_l < L && tmp_l < final_graph_[ep_].size(); tmp_l++) {
     init_ids[tmp_l] = final_graph_[ep_][tmp_l];
     flags[init_ids[tmp_l]] = true;
   }
 
+  // If ep_'s neighbors are not enough, add other random vertices
   while (tmp_l < L) {
     unsigned id = rand() % nd_;
     if (flags[id]) continue;
@@ -471,6 +473,7 @@ void IndexNSG::Search(const float *query, const float *x, size_t K,
     tmp_l++;
   }
 
+  // Get the distances of all candidates, store in the set retset.
   for (unsigned i = 0; i < init_ids.size(); i++) {
     unsigned id = init_ids[i];
     float dist =
@@ -480,9 +483,9 @@ void IndexNSG::Search(const float *query, const float *x, size_t K,
   }
 
   std::sort(retset.begin(), retset.begin() + L);
-  int k = 0;
+  int k = 0; // the index of the 1st unchecked vertices in retset.
   while (k < (int)L) {
-    int nk = L;
+    int nk = L; // the minimum insert location of new candidates
 
     if (retset[k].flag) {
       retset[k].flag = false;
@@ -496,7 +499,7 @@ void IndexNSG::Search(const float *query, const float *x, size_t K,
             distance_->compare(query, data_ + dimension_ * id, (unsigned)dimension_);
         if (dist >= retset[L - 1].distance) continue;
         Neighbor nn(id, dist, true);
-        int r = InsertIntoPool(retset.data(), L, nn);
+        int r = InsertIntoPool(retset.data(), L, nn); // insert location
 
         if (r < nk) nk = r;
       }
@@ -506,7 +509,7 @@ void IndexNSG::Search(const float *query, const float *x, size_t K,
     else
       ++k;
   }
-  for (size_t i = 0; i < K; i++) {
+  for (size_t i = 0; i < K; i++) { // That's why L >= K required.
     indices[i] = retset[i].id;
   }
 }
@@ -532,13 +535,25 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
     flags[init_ids[tmp_l]] = true;
   }
 
+  // Added by Johnpzh
+  unsigned tmp_id = ep_ + 1; // use tmp_id to replace rand().
   while (tmp_l < L) {
-    unsigned id = rand() % nd_;
+      tmp_id %= nd_;
+    unsigned id = tmp_id++;
     if (flags[id]) continue;
     flags[id] = true;
     init_ids[tmp_l] = id;
     tmp_l++;
   }
+  /////////////////////////////
+//  while (tmp_l < L) {
+//    unsigned id = rand() % nd_;
+//    if (flags[id]) continue;
+//    flags[id] = true;
+//    init_ids[tmp_l] = id;
+//    tmp_l++;
+//  }
+  // Ended y Johnpzh
 
   for (unsigned i = 0; i < init_ids.size(); i++) {
     unsigned id = init_ids[i];

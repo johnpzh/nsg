@@ -6,6 +6,9 @@
 #include <efanna2e/util.h>
 #include <chrono>
 #include <string>
+// Added by Johnpzh
+#include <omp.h>
+// Ended by Johnpzh
 
 void load_data(char* filename, float*& data, unsigned& num,
                unsigned& dim) {  // load data with sift10K pattern
@@ -75,13 +78,36 @@ int main(int argc, char** argv) {
   paras.Set<unsigned>("L_search", L);
   paras.Set<unsigned>("P_search", L);
 
+//  // Added by Johnpzh
+//  query_num = 32;
+//  // Ended by Johnpzh
   std::vector<std::vector<unsigned> > res(query_num);
   for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
   auto s = std::chrono::high_resolution_clock::now();
+
+  // Added by Johnpzh
+//#pragma omp parallel for num_threads(20)
   for (unsigned i = 0; i < query_num; i++) {
+      if (0 == i) {
+          printf("num_threads: %u\n", omp_get_num_threads());
+      }
     index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
   }
+//  for (unsigned i = 0; i < query_num; i++) {
+//    index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
+//  }
+
+//    // Test the res
+//    for (size_t i = 0; i < res.size(); ++i) {
+//        for (size_t d_i = 0; d_i < res[i].size(); ++d_i) {
+//            printf("%lu[%lu]: %u\n", i, d_i, res[i][d_i]);
+//        }
+//        printf("\n");
+//    }
+//    exit(1);
+//    // End test the res
+    // Ended by Johnpzh
   auto e = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = e - s;
   std::cout << "search_time: " << diff.count() << "\n";
