@@ -5,6 +5,7 @@ cmake-build-*/
 
 # Clion
 .idea/
+.clion.source.upload.marker
 
 # Output files
 *.nsg

@@ -9,6 +9,10 @@
 #include "efanna2e/exceptions.h"
 #include "efanna2e/parameters.h"
 
+// Added by Johnpzh
+#include  "extras/utils.h"
+// Ended by Johnpzh
+
 namespace efanna2e {
 #define _CONTROL_NUM 100
 IndexNSG::IndexNSG(const size_t dimension, const size_t n, Metric m,
@@ -545,7 +549,8 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
     init_ids[tmp_l] = id;
     tmp_l++;
   }
-  /////////////////////////////
+    /////////////////////////////
+    //
 //  while (tmp_l < L) {
 //    unsigned id = rand() % nd_;
 //    if (flags[id]) continue;
@@ -553,6 +558,8 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
 //    init_ids[tmp_l] = id;
 //    tmp_l++;
 //  }
+    //
+    /////////////////////////////
   // Ended y Johnpzh
 
   for (unsigned i = 0; i < init_ids.size(); i++) {

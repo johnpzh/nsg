@@ -8,6 +8,7 @@
 #include <string>
 // Added by Johnpzh
 #include <omp.h>
+#include  "extras/utils.h"
 // Ended by Johnpzh
 
 void load_data(char* filename, float*& data, unsigned& num,
@@ -51,6 +52,7 @@ int main(int argc, char** argv) {
               << std::endl;
     exit(-1);
   }
+  setbuf(stdout, nullptr); // Added by Johnpzh
   float* data_load = NULL;
   unsigned points_num, dim;
   load_data(argv[1], data_load, points_num, dim);
@@ -58,6 +60,9 @@ int main(int argc, char** argv) {
   unsigned query_num, query_dim;
   load_data(argv[2], query_load, query_num, query_dim);
   assert(dim == query_dim);
+    {
+        printf("query_num: %u\n", query_num);
+    }
 
   unsigned L = (unsigned)atoi(argv[4]);
   unsigned K = (unsigned)atoi(argv[5]);
@@ -81,38 +86,57 @@ int main(int argc, char** argv) {
 //  // Added by Johnpzh
 //  query_num = 32;
 //  // Ended by Johnpzh
-  std::vector<std::vector<unsigned> > res(query_num);
-  for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
-  auto s = std::chrono::high_resolution_clock::now();
+    for (int num_threads = 1; num_threads < 37; num_threads *= 2) {
 
-  // Added by Johnpzh
-//#pragma omp parallel for num_threads(20)
-  for (unsigned i = 0; i < query_num; i++) {
-      if (0 == i) {
-          printf("num_threads: %u\n", omp_get_num_threads());
-      }
-    index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
-  }
-//  for (unsigned i = 0; i < query_num; i++) {
-//    index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
-//  }
+        std::vector<std::vector<unsigned> > res(query_num);
+        for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
-//    // Test the res
-//    for (size_t i = 0; i < res.size(); ++i) {
-//        for (size_t d_i = 0; d_i < res[i].size(); ++d_i) {
-//            printf("%lu[%lu]: %u\n", i, d_i, res[i][d_i]);
-//        }
-//        printf("\n");
-//    }
-//    exit(1);
-//    // End test the res
-    // Ended by Johnpzh
-  auto e = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> diff = e - s;
-  std::cout << "search_time: " << diff.count() << "\n";
+        // Added by Johnpzh
+        double memvirt;
+        double memres;
+        double memtotal;
+        double memfree;
+        omp_set_num_threads(num_threads);
+        for (int warmup = 0; warmup < 4; ++warmup) {
+            auto s = std::chrono::high_resolution_clock::now();
+#pragma omp parallel for
+            for (unsigned i = 0; i < query_num; i++) {
+                index.SearchWithOptGraph(query_load + i * dim, K, paras,
+                                         res[i].data());
+                if (0 == i) {
+                    efanna2e::Utils::memory_usage(memvirt, memres);
+                    efanna2e::Utils::system_memory(memtotal, memfree);
+                }
+            }
 
-  save_result(argv[6], res);
+            /////////////////////////////
+            //
+//        auto s = std::chrono::high_resolution_clock::now(); // commented by Johnpzh
+//          for (unsigned i = 0; i < query_num; i++) {
+//            index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
+//          }
+            //
+            /////////////////////////////
+            // Ended by Johnpzh
+            auto e = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> diff = e - s;
+            // Add by Johnpzh
+            printf("num_threads: %u "
+                   "search_time: %f "
+                   "memvirt: %.2fMB memres: %.2fMB "
+                   "memtotal: %.2fMB memfree: %.2fMB\n",
+                   num_threads,
+                   diff.count(),
+                   memvirt, memres,
+                   memtotal, memfree);
+//        std::cout << "num_threads: " << num_threads
+//                  << " search_time: " << diff.count() << "\n";
+//  std::cout << "search_time: " << diff.count() << "\n";
+            // Ended by Johnpzh
 
+            save_result(argv[6], res);
+        }
+    }
   return 0;
 }
