@@ -60,9 +60,12 @@ int main(int argc, char** argv) {
   unsigned query_num, query_dim;
   load_data(argv[2], query_load, query_num, query_dim);
   assert(dim == query_dim);
+	// Added by Johnpzh
     {
+		if (query_num > 1000000) query_num = 1000000;
         printf("query_num: %u\n", query_num);
     }
+	// Ended by Johnpzh
 
   unsigned L = (unsigned)atoi(argv[4]);
   unsigned K = (unsigned)atoi(argv[5]);
