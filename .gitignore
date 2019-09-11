@@ -9,7 +9,7 @@ cmake-build-*/
 
 # Output files
 *.nsg
-*.txt
+output.*
 
 # Data files
 *.ivecs

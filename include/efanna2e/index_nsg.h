@@ -40,8 +40,13 @@ class IndexNSG : public Index {
       unsigned *indices);
   void OptimizeGraph(float* data);
 
-  // For profiling.
+
     // Added by Johnpzh
+     void  get_true_NN(
+            const float *query,
+            unsigned K,
+            unsigned *indices);
+    // For profiling.
 //    double time_medoid;
     double time_load_graph;
     double time_init_graph;
