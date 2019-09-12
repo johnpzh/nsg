@@ -45,7 +45,12 @@ class IndexNSG : public Index {
      void  get_true_NN(
             const float *query,
             unsigned K,
-            unsigned *indices);
+            std::vector< std::pair<unsigned, float> > &ngbrs);
+    void SearchWithOptGraph(
+            const float *query,
+            size_t K,
+            const Parameters &parameters,
+            std::vector< std::pair<unsigned, float> > &ngbrs);
     // For profiling.
 //    double time_medoid;
     double time_load_graph;

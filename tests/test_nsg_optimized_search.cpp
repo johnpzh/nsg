@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
                 }
             }
 
-            /////////////////////////////
+            ///////////////////////////////
             //
 //          auto s = std::chrono::high_resolution_clock::now(); // commented by Johnpzh
 //          for (unsigned i = 0; i < query_num; i++) {
