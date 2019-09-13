@@ -1,0 +1,18 @@
+build/
+
+# Build
+cmake-build-*/
+
+# Clion
+.idea/
+.clion.source.upload.marker
+
+# VSCode
+.vscode/
+
+# Output files
+*.nsg
+output.*
+
+# Data files
+*.ivecs
