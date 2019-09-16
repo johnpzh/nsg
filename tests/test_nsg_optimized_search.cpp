@@ -15,8 +15,8 @@ void load_data(char *filename, float *&data, unsigned &num,
                unsigned &dim) {  // load data with sift10K pattern
     std::ifstream in(filename, std::ios::binary);
     if (!in.is_open()) {
-        std::cout << "open file error" << std::endl;
-        exit(-1);
+        fprintf(stderr, "Error: cannot open file %s\n", filename);
+        exit(EXIT_FAILURE);
     }
     in.read((char *) &dim, 4);
     // std::cout<<"data dimension: "<<dim<<std::endl;
@@ -112,8 +112,7 @@ int main(int argc, char **argv) {
             auto s = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for
             for (unsigned i = 0; i < query_num; i++) {
-                index.SearchWithOptGraph(query_load + i * dim, K, paras,
-                                         res[i].data());
+                index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
 //                if (0 == i) {
 //                    efanna2e::Utils::memory_usage(memvirt, memres);
 //                    efanna2e::Utils::system_memory(memtotal, memfree);
@@ -135,11 +134,15 @@ int main(int argc, char **argv) {
             printf("L: %u "
                    "search_time: %f "
                    "K: %u "
+                   "Volume: %u "
+                   "Dimension: %u "
                    "query_num: %u "
                    "query_per_sec: %f\n",
                    L,
                    diff.count(),
                    K,
+                   points_num,
+                   dim,
                    query_num,
                    query_num / diff.count());
 //            printf("num_threads: %u "

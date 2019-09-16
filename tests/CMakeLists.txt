@@ -14,3 +14,6 @@ target_link_libraries(test_precision ${PROJECT_NAME} -ltcmalloc)
 
 add_executable(test_save_NN test_save_NN.cpp)
 target_link_libraries(test_save_NN ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(test_change_data_vol_and_dim test_change_data_vol_and_dim.cpp)
+target_link_libraries(test_change_data_vol_and_dim ${PROJECT_NAME} -ltcmalloc)

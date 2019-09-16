@@ -9,8 +9,8 @@ void load_data(char* filename, float*& data, unsigned& num,
                unsigned& dim) {  // load data with sift10K pattern
   std::ifstream in(filename, std::ios::binary);
   if (!in.is_open()) {
-    std::cout << "open file error" << std::endl;
-    exit(-1);
+      fprintf(stderr, "Error: cannot open file %s\n", filename);
+      exit(EXIT_FAILURE);
   }
   in.read((char*)&dim, 4);
   std::cout << "data dimension: " << dim << std::endl;
