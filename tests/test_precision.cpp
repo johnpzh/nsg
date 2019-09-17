@@ -149,6 +149,10 @@ int main(int argc, char **argv)
     unsigned query_num, query_dim;
     load_data(argv[2], query_load, query_num, query_dim);
     assert(dim == query_dim);
+    {//test
+        printf("points_num: %u dim: %u query_num: %u\n", points_num, dim, query_num);
+        exit(1);
+    }
 
     unsigned L = strtoull(argv[4], nullptr, 0);
     unsigned K = strtoull(argv[5], nullptr, 0);

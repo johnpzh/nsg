@@ -50,11 +50,9 @@ void save_output_file(
         fprintf(stderr, "Error: cannot create file %s\n", filename);
         exit(EXIT_FAILURE);
     }
-    fout.write(reinterpret_cast<char *>(&output_dim), sizeof(output_dim));
-//    size_t data_index = 0;
-    uint32_t blank = 0;
+//    fout.write(reinterpret_cast<char *>(&output_dim), sizeof(output_dim));
     for (unsigned i = 0; i < output_vol; ++i) {
-        fout.write(reinterpret_cast<const char *>(&blank), 4);
+        fout.write(reinterpret_cast<const char *>(&output_dim), 4);
         fout.write(reinterpret_cast<const char *>(data + i * input_dim), output_dim * 4);
     }
     fout.close();
