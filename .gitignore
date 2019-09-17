@@ -16,3 +16,6 @@ output.*
 
 # Data files
 *.ivecs
+
+# Tmp files
+*.swp
