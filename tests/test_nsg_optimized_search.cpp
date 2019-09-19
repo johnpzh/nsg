@@ -105,14 +105,17 @@ int main(int argc, char **argv) {
 //        double memfree;
 //        omp_set_num_threads(num_threads);
         {// Added by Johnpzh: measure a query's top-L neighbors' latencies
-            index.top_one_latencies.resize(query_num);
-            index.top_k_latencies.resize(query_num);
             index.time_neighbors_latencies.resize(L);
+            index.count_neighbors_hops.resize(L);
         }
         int warmup_max = 4;
         for (int warmup = 0; warmup < warmup_max; ++warmup) {
             // For measurement only
             uint64_t distance_computation_count = 0;
+            std::vector<double> top_one_latencies(query_num); // used with time_neighbors_latencies
+            std::vector<double> top_k_latencies(query_num); // used with time_neighbors_latencies
+            std::vector<uint32_t > top_one_hops(query_num); // used with count_neighbors_hops
+            std::vector<uint32_t> top_k_hops(query_num); // used with count_neighbors_hops
 
             std::vector <std::vector<unsigned>> res(query_num);
             for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
@@ -124,8 +127,15 @@ int main(int argc, char **argv) {
                     for (unsigned n_i = 0; n_i < L; ++n_i) {
                         index.time_neighbors_latencies[n_i].first = efanna2e::Utils::get_time_mark(); // start time
                     }
+
+                    // Hops
+                    for (unsigned n_i = 0; n_i < L; ++n_i) {
+                        index.count_neighbors_hops[n_i] = 0;
+                    }
+
                     // Distance computation count
                     index.count_distance_computation = 0;
+
                 }
                 index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
 //                if (0 == i) {
@@ -133,8 +143,12 @@ int main(int argc, char **argv) {
 //                    efanna2e::Utils::system_memory(memtotal, memfree);
 //                }
                 {// Added by Johnpzh: measure a query's top-L neighbors' latencies
-                    index.top_one_latencies[i] = index.time_neighbors_latencies[0].second;
-                    index.top_k_latencies[i] = index.time_neighbors_latencies[K-1].second;
+                    top_one_latencies[i] = index.time_neighbors_latencies[0].second;
+                    top_k_latencies[i] = index.time_neighbors_latencies[K - 1].second;
+
+                    // Hops
+                    top_one_hops[i] = index.count_neighbors_hops[0];
+                    top_k_hops[i] = index.count_neighbors_hops[K - 1];
 
                     // Distance computation count
 //                    printf("distance_computation_count: %lu\n", index.count_distance_computation);
@@ -158,15 +172,23 @@ int main(int argc, char **argv) {
                 // For latencies of top-K neighbors
                 double latency_one = 0;
                 for (unsigned q_i = 0; q_i < query_num; ++q_i) {
-                    latency_one += index.top_one_latencies[q_i];
+                    latency_one += top_one_latencies[q_i];
                 }
                 latency_one /= query_num;
 
                 double latency_k = 0;
                 for (unsigned q_i = 0; q_i < query_num; ++q_i) {
-                    latency_k += index.top_k_latencies[q_i];
+                    latency_k += top_k_latencies[q_i];
                 }
                 latency_k /= query_num;
+
+                // For hops
+                uint64_t hops_one = 0;
+                uint64_t hops_k = 0;
+                for (unsigned q_i = 0; q_i < query_num; ++q_i) {
+                    hops_one += top_one_hops[q_i];
+                    hops_k += top_k_hops[q_i];
+                }
 
                 printf("L: %u "
                        "search_time(s.): %f "
@@ -176,9 +198,11 @@ int main(int argc, char **argv) {
                        "query_num: %u "
                        "query_per_sec: %f "
                        "average_latency(ms.): %f "
-                       "Top-1_avg_latency(ms.): %f "
-                       "Top-%u_avg_latency(ms.): %f "
-                       "distance_computation_avg_count: %lu\n",
+                       "Top-1st_avg_latency(ms.): %f "
+                       "Top-%uth_avg_latency(ms.): %f "
+                       "distance_computation_avg_count: %lu "
+                       "Top-1st_avg_hops: %f "
+                       "Top-%uth_avg_hops: %f\n",
                        L,
                        diff.count(),
                        K,
@@ -189,7 +213,9 @@ int main(int argc, char **argv) {
                        diff.count() * 1000 / query_num,
                        latency_one * 1000,
                        K, latency_k * 1000,
-                       distance_computation_count / query_num);
+                       distance_computation_count / query_num,
+                       1.0 * hops_one / query_num,
+                       K, 1.0 * hops_k / query_num);
             }
 
 //            printf("num_threads: %u "

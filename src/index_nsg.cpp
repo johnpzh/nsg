@@ -590,6 +590,7 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
     // std::cout<<L<<std::endl;
 
     std::sort(retset.begin(), retset.begin() + L);
+    uint32_t hops = 0;
     int k = 0; // the index of the 1st unchecked vertices in retset.
     while (k < (int) L) {
         int nk = L; // the minimum insert location of new candidates
@@ -597,6 +598,7 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
         if (retset[k].flag) {
             retset[k].flag = false;
             unsigned n = retset[k].id;
+            ++hops;
 
             _mm_prefetch(opt_graph_ + node_size * n + data_len, _MM_HINT_T0);
             unsigned *neighbors = (unsigned *) (opt_graph_ + node_size * n + data_len);
@@ -626,11 +628,13 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
         if (nk <= k) {
             {// Added by Johnpzh
                 time_neighbors_latencies[nk].second = efanna2e::Utils::get_time_mark() - time_neighbors_latencies[nk].first;
+                count_neighbors_hops[nk] = hops;
             }
             k = nk;
         } else {
             {// Added by Johnpzh
                 time_neighbors_latencies[k].second = efanna2e::Utils::get_time_mark() - time_neighbors_latencies[k].first;
+                count_neighbors_hops[k] = hops;
             }
             ++k;
         }

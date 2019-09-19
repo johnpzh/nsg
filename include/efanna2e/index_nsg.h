@@ -60,8 +60,10 @@ class IndexNSG : public Index {
     double time_mrng;
     double time_tree_grow;
     std::vector< std::pair<double, double> > time_neighbors_latencies; // Latency of top-L neighbors
-    std::vector<double> top_one_latencies; // used with time_neighbors_latencies
-    std::vector<double> top_k_latencies; // used with time_neighbors_latencies
+//    std::vector<double> top_one_latencies; // used with time_neighbors_latencies
+//    std::vector<double> top_k_latencies; // used with time_neighbors_latencies
+    std::vector<uint32_t> count_neighbors_hops; // Hops of top-L neighbors
+
     // Ended by Johnpzh
 
   protected:

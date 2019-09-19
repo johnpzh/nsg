@@ -42,18 +42,20 @@ nsg_index_bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests
 # FAKE
 data_path=/scratch/zpeng/fake
 data_name=fake
-vol_start=20000
-vol_bound=200000
-vol_step=20000
+vol_start=1000
+vol_bound=10000000
+#vol_step=20000
 dim_start=64
 dim_bound=512
-dim_step=64
+#dim_step=64
 K=400
 
 echo "==== ${data_path}/${data_name} ===="
 set -x
-for ((vol = vol_start; vol <= vol_bound; vol += vol_step)); do
-	for ((dim = dim_start; dim <= dim_bound; dim += dim_step)); do
+#for ((vol = vol_start; vol <= vol_bound; vol += vol_step)); do
+#	for ((dim = dim_start; dim <= dim_bound; dim += dim_step)); do
+for ((vol = vol_start; vol <= vol_bound; vol *= 10)); do
+	for ((dim = dim_start; dim <= dim_bound; dim *= 2)); do
 		${nndescent_bin} ${data_path}/${data_name}_v${vol}d${dim}_base.fvecs ${data_path}/${data_name}_v${vol}d${dim}_${K}nn.graph 400 400 12 15 100
 		${nsg_index_bin} ${data_path}/${data_name}_v${vol}d${dim}_base.fvecs ${data_path}/${data_name}_v${vol}d${dim}_${K}nn.graph 60 70 500 ${data_path}/${data_name}_v${vol}d${dim}.nsg
 	done
