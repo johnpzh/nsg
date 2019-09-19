@@ -580,6 +580,9 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
         float norm_x = *x;
         x++;
         float dist = dist_fast->compare(x, query, norm_x, (unsigned) dimension_);
+        {// Added by Johnpzh
+            ++count_distance_computation;
+        }
         retset[i] = Neighbor(id, dist, true);
         flags[id] = true;
         L++;
@@ -609,6 +612,9 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
                 float norm = *data;
                 data++;
                 float dist = dist_fast->compare(query, data, norm, (unsigned) dimension_);
+                {// Added by Johnpzh
+                    ++count_distance_computation;
+                }
                 if (dist >= retset[L - 1].distance) continue;
                 Neighbor nn(id, dist, true);
                 int r = InsertIntoPool(retset.data(), L, nn); // insert location
@@ -617,10 +623,17 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
                 if (r < nk) nk = r;
             }
         }
-        if (nk <= k)
+        if (nk <= k) {
+            {// Added by Johnpzh
+                time_neighbors_latencies[nk].second = efanna2e::Utils::get_time_mark() - time_neighbors_latencies[nk].first;
+            }
             k = nk;
-        else
+        } else {
+            {// Added by Johnpzh
+                time_neighbors_latencies[k].second = efanna2e::Utils::get_time_mark() - time_neighbors_latencies[k].first;
+            }
             ++k;
+        }
     }
     for (size_t i = 0; i < K; i++) {
         indices[i] = retset[i].id;

@@ -53,11 +53,15 @@ class IndexNSG : public Index {
             std::vector< std::pair<unsigned, float> > &ngbrs);
     // For profiling.
 //    double time_medoid;
+    uint64_t count_distance_computation = 0;
     double time_load_graph;
     double time_init_graph;
     double time_link;
     double time_mrng;
     double time_tree_grow;
+    std::vector< std::pair<double, double> > time_neighbors_latencies; // Latency of top-L neighbors
+    std::vector<double> top_one_latencies; // used with time_neighbors_latencies
+    std::vector<double> top_k_latencies; // used with time_neighbors_latencies
     // Ended by Johnpzh
 
   protected:

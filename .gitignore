@@ -7,6 +7,9 @@ cmake-build-*/
 .idea/
 .clion.source.upload.marker
 
+# VSCode
+.vscode/
+
 # Output files
 *.nsg
 output.*

@@ -1,6 +1,9 @@
 //
 // Created by Zhen Peng on 9/12/19.
 //
+/*
+ * Get the true-K nearest neighbors (NN), then save to a file to be a input for test_precision.
+ */
 #include <efanna2e/index_nsg.h>
 #include <efanna2e/util.h>
 #include <chrono>
