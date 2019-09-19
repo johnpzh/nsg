@@ -99,7 +99,6 @@ int main(int argc, char **argv) {
 //        for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
         // Added by Johnpzh
-
 //        double memvirt;
 //        double memres;
 //        double memtotal;
