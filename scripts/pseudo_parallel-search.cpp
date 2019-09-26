@@ -28,5 +28,5 @@ void parallel_searching(
             if (Ss[q_i].size > L) Ss.resize(L);
         }
     }
-    for (every set S : Ss) Ss.resize(K);
+    for (every set S : Ss) S.resize(K);
 }
