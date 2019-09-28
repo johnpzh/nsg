@@ -9,14 +9,17 @@ target_link_libraries(test_nsg_search ${PROJECT_NAME})
 add_executable(test_nsg_optimized_search test_nsg_optimized_search.cpp)
 target_link_libraries(test_nsg_optimized_search ${PROJECT_NAME} -ltcmalloc)
 
-add_executable(test_precision test_precision.cpp)
-target_link_libraries(test_precision ${PROJECT_NAME} -ltcmalloc)
+add_executable(profile_precision profile_precision.cpp)
+target_link_libraries(profile_precision ${PROJECT_NAME} -ltcmalloc)
 
-add_executable(test_save_NN test_save_NN.cpp)
-target_link_libraries(test_save_NN ${PROJECT_NAME} -ltcmalloc)
+add_executable(profile_save_NN profile_save_NN.cpp)
+target_link_libraries(profile_save_NN ${PROJECT_NAME} -ltcmalloc)
 
-add_executable(test_change_data_vol_and_dim test_change_data_vol_and_dim.cpp)
-target_link_libraries(test_change_data_vol_and_dim ${PROJECT_NAME} -ltcmalloc)
+add_executable(profile_change_data_vol_and_dim profile_change_data_vol_and_dim.cpp)
+target_link_libraries(profile_change_data_vol_and_dim ${PROJECT_NAME} -ltcmalloc)
 
-add_executable(test_gen_data test_gen_data.cpp)
-target_link_libraries(test_gen_data ${PROJECT_NAME} -ltcmalloc)
+add_executable(profile_gen_data profile_gen_data.cpp)
+target_link_libraries(profile_gen_data ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_search_shared_candidates profile_search_shared_candidates.cpp)
+target_link_libraries(profile_search_shared_candidates ${PROJECT_NAME} -ltcmalloc)
