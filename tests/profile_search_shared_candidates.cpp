@@ -61,7 +61,7 @@ std::vector<double> get_shared_percentage_of_two_queries(
     std::vector<double> pertentages(max_hops);
 
     for (size_t q_i = 0; q_i < min_hops; ++min_hops) {
-        
+
     }
 }
 

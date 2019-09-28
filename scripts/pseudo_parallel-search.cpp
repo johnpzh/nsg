@@ -67,5 +67,5 @@ void parallel_searching_0(
         }
     }
     for (every set S : Ss)
-        Ss.resize(K);
+        S.resize(K);
 }
