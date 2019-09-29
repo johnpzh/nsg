@@ -42,10 +42,10 @@ nsg_index_bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests
 # FAKE
 data_path=/scratch/zpeng/fake
 data_name=fake
-vol_start=1000
+vol_start=10000000
 vol_bound=10000000
 #vol_step=20000
-dim_start=64
+dim_start=512
 dim_bound=512
 #dim_step=64
 K=400

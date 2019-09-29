@@ -1053,8 +1053,8 @@ void IndexNSG::get_candidate_queues(
     // Lambda: use ids in current retset to form a queue and push it into queues.
     auto push_back_retset = [&] (std::vector<Neighbor> &retset) {
         std::vector<unsigned> ids(retset.size());
-        for (const auto &n : retset) {
-            ids.push_back(n.id);
+        for (unsigned id_i = 0; id_i < retset.size(); ++id_i) {
+            ids[id_i] = retset[id_i].id;
         }
         queues.push_back(ids);
     };
@@ -1126,15 +1126,13 @@ void IndexNSG::get_candidate_queues(
     }
 
     std::sort(retset.begin(), retset.begin() + L);
-    uint32_t hops = 0;
     int k = 0; // the index of the 1st unchecked vertices in retset.
     while (k < (int) L) {
         int nk = L; // the minimum insert location of new candidates
-
+        bool is_queue_updated = false;
         if (retset[k].flag) {
             retset[k].flag = false;
             unsigned n = retset[k].id;
-            ++hops;
 
             _mm_prefetch(opt_graph_ + node_size * n + data_len, _MM_HINT_T0);
             unsigned *ngbrs = (unsigned *) (opt_graph_ + node_size * n + data_len);
@@ -1156,6 +1154,13 @@ void IndexNSG::get_candidate_queues(
 
                 // if(L+1 < retset.size()) ++L;
                 if (r < nk) nk = r;
+
+                {
+                    if (r < (int) L) {
+//                        push_back_retset(retset);
+                        is_queue_updated = true;
+                    }
+                }
             }
         }
         if (nk <= k) {
@@ -1164,7 +1169,9 @@ void IndexNSG::get_candidate_queues(
             ++k;
         }
         {
-            push_back_retset(retset);
+            if (is_queue_updated) {
+                push_back_retset(retset);
+            }
         }
     }
 }

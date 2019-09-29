@@ -13,7 +13,6 @@ void parallel_searching_1(
         fused_K_nearest_neighbors_of_queries Ss // size: GQs.size
         )
 {
-    Flags not_visited; // size: Qs.size
     Neighbor n;
     n.id = p;
     n.distance = 0;

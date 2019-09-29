@@ -52,16 +52,35 @@ void save_result(const char *filename,
     out.close();
 }
 
-std::vector<double> get_shared_percentage_of_two_queries(
-        std::vector< std::vector<unsigned> > queues_a,
-        std::vector< std::vector<unsigned> > queues_b)
+// Function: get every percentage of shared candidates of every hop
+void get_shared_percentage_of_two_queries(
+        const std::vector< std::vector<unsigned> > &queues_a,
+        const std::vector< std::vector<unsigned> > &queues_b,
+        std::vector<double> &percentages)
 {
     size_t max_hops = std::max(queues_a.size(), queues_b.size());
     size_t min_hops = std::min(queues_a.size(), queues_b.size());
-    std::vector<double> pertentages(max_hops);
+    percentages.resize(max_hops);
 
-    for (size_t q_i = 0; q_i < min_hops; ++min_hops) {
+    for (size_t q_i = 0; q_i < min_hops; ++q_i) {
+        std::unordered_set<unsigned> pool;
+        unsigned shared_count = 0;
+        // Put queues_a[q_i] into the pool
+        for (unsigned c : queues_a[q_i]) {
+            pool.insert(c);
+        }
+        // Look up by queues_b[q_i]
+        for (unsigned c : queues_b[q_i]) {
+            if (pool.find(c) != pool.end()) {
+                ++shared_count;
+            }
+        }
+        // Record
+        percentages[q_i] = 2.0 * shared_count / (double) (queues_a[q_i].size() + queues_b[q_i].size());
+    }
 
+    for (size_t q_i = min_hops; q_i < max_hops; ++q_i) {
+        percentages[q_i] = 0.0;
     }
 }
 
@@ -82,10 +101,8 @@ int main(int argc, char **argv)
     load_data(argv[2], query_load, query_num, query_dim);
     assert(dim == query_dim);
     // Added by Johnpzh
-    {
-        unsigned query_num_max = strtoull(argv[7], nullptr, 0);
-        if (query_num > query_num_max) query_num = query_num_max;
-    }
+    unsigned query_num_max = strtoull(argv[7], nullptr, 0);
+    if (query_num < query_num_max) query_num_max = query_num;
     // Ended by Johnpzh
 
     unsigned L = (unsigned) atoi(argv[4]);
@@ -107,6 +124,7 @@ int main(int argc, char **argv)
     paras.Set<unsigned>("L_search", L);
     paras.Set<unsigned>("P_search", L);
 
+    srand(time(nullptr));
     using Queues_t = std::vector< std::vector<unsigned> >;
     int num_threads_max = 1;
     for (int num_threads = 1; num_threads < num_threads_max + 1; num_threads *= 2) {
@@ -119,37 +137,53 @@ int main(int argc, char **argv)
 
             auto s = std::chrono::high_resolution_clock::now();
 //#pragma omp parallel for
-            for (unsigned i = 0; i < query_num; i++) {
+            for (unsigned i = 0; i < query_num_max; i++) {
 //                index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
-                index.get_candidate_queues(query_load + i * dim, K, paras, queues_list[i]);
 
-                // Ended by Johnpzh
-                auto e = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> diff = e - s;
-                // Add by Johnpzh
-                {// Basic output
-                    printf("L: %u "
-                           "search_time(s.): %f "
-                           "K: %u "
-                           "Volume: %u "
-                           "Dimension: %u "
-                           "query_num: %u "
-                           "query_per_sec: %f "
-                           "average_latency(ms.): %f\n",
-                           L,
-                           diff.count(),
-                           K,
-                           points_num,
-                           dim,
-                           query_num,
-                           query_num / diff.count(),
-                           diff.count() * 1000 / query_num);
-                }
-                // Ended by Johnpzh
-
+                unsigned loc = rand() % query_num;
+//                unsigned loc = i;
+                index.get_candidate_queues(query_load + loc * dim, K, paras, queues_list[i]);
+            }
+            // Ended by Johnpzh
+            auto e = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> diff = e - s;
+            // Add by Johnpzh
+//            {// Basic output
+//                printf("L: %u "
+//                       "search_time(s.): %f "
+//                       "K: %u "
+//                       "Volume: %u "
+//                       "Dimension: %u "
+//                       "query_num: %u "
+//                       "query_per_sec: %f "
+//                       "average_latency(ms.): %f\n",
+//                       L,
+//                       diff.count(),
+//                       K,
+//                       points_num,
+//                       dim,
+//                       query_num_max,
+//                       query_num_max / diff.count(),
+//                       diff.count() * 1000 / query_num_max);
+//            }
+            // Ended by Johnpzh
 //                save_result(argv[6], res);
+            { // Percentages
+                for (unsigned q_i = 0; q_i < query_num_max; q_i += 2) {
+                    printf("------- queries %d and %d -------\n", q_i + 1, q_i + 2);
+                    std::vector<double> percentages;
+                    get_shared_percentage_of_two_queries(queues_list[q_i], queues_list[q_i + 1], percentages);
+                    double sum = 0;
+                    for (size_t p_i = 0; p_i < percentages.size(); ++p_i) {
+                        sum += percentages[p_i];
+                        if (q_i == 0) {
+                            printf("%lu %f\n", p_i, percentages[p_i] * 100.0);
+                        }
+                    }
+                    printf("avg_percentage(%%): %f\n", sum / percentages.size() * 100.0);
+                }
             }
         }
-        return 0;
     }
+    return 0;
 }

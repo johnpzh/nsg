@@ -107,37 +107,37 @@ int main(int argc, char **argv)
 //#pragma omp parallel for
             for (unsigned i = 0; i < query_num; i++) {
                 index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
-
+            }
                 ///////////////////////////////
                 //
 //          auto s = std::chrono::high_resolution_clock::now(); // commented by Johnpzh
 //          for (unsigned i = 0; i < query_num; i++) {
 //            index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
 //          }
-                //
-                /////////////////////////////
-                // Ended by Johnpzh
-                auto e = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> diff = e - s;
-                // Add by Johnpzh
-                {// Basic output
-                    printf("L: %u "
-                           "search_time(s.): %f "
-                           "K: %u "
-                           "Volume: %u "
-                           "Dimension: %u "
-                           "query_num: %u "
-                           "query_per_sec: %f "
-                           "average_latency(ms.): %f\n",
-                           L,
-                           diff.count(),
-                           K,
-                           points_num,
-                           dim,
-                           query_num,
-                           query_num / diff.count(),
-                           diff.count() * 1000 / query_num);
-                }
+            //
+            /////////////////////////////
+            // Ended by Johnpzh
+            auto e = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> diff = e - s;
+            // Add by Johnpzh
+            {// Basic output
+                printf("L: %u "
+                       "search_time(s.): %f "
+                       "K: %u "
+                       "Volume: %u "
+                       "Dimension: %u "
+                       "query_num: %u "
+                       "query_per_sec: %f "
+                       "average_latency(ms.): %f\n",
+                       L,
+                       diff.count(),
+                       K,
+                       points_num,
+                       dim,
+                       query_num,
+                       query_num / diff.count(),
+                       diff.count() * 1000 / query_num);
+            }
 
 //            printf("num_threads: %u "
 //                   "search_time: %f "
@@ -147,14 +147,14 @@ int main(int argc, char **argv)
 //                   diff.count(),
 //                   memvirt, memres,
 //                   memtotal, memfree);
-                // Ended by Johnpzh
+            // Ended by Johnpzh
 
-                save_result(argv[6], res);
-            }
+            save_result(argv[6], res);
         }
-        return 0;
     }
+    return 0;
 }
+
 
 //// Backup: some measurement
 //// distance computation; average hops; average latency for top-1st and top-Kth
