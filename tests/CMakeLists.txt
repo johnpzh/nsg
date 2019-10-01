@@ -23,3 +23,6 @@ target_link_libraries(profile_gen_data ${PROJECT_NAME} -ltcmalloc)
 
 add_executable(profile_search_shared_candidates profile_search_shared_candidates.cpp)
 target_link_libraries(profile_search_shared_candidates ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_pair_queries profile_pair_queries.cpp)
+target_link_libraries(profile_pair_queries ${PROJECT_NAME} -ltcmalloc)

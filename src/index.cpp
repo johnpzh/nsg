@@ -14,5 +14,10 @@ Index::Index(const size_t dimension, const size_t n, Metric metric = L2)
         break;
     }
 }
-Index::~Index() {}
+Index::~Index()
+{
+    // Added by Johnpzh
+    delete distance_;
+    // Ended by Johnpzh
+}
 }

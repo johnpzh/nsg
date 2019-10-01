@@ -134,19 +134,24 @@ int main(int argc, char **argv)
 //            std::vector<std::vector<unsigned>> res(query_num);
 //            for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
             std::vector<Queues_t> queues_list(query_num);
+            std::vector<bool> is_selected(query_num, false);
 
-            auto s = std::chrono::high_resolution_clock::now();
+//            auto s = std::chrono::high_resolution_clock::now();
 //#pragma omp parallel for
             for (unsigned i = 0; i < query_num_max; i++) {
 //                index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
 
-                unsigned loc = rand() % query_num;
-//                unsigned loc = i;
+//                unsigned loc = rand() % query_num; // Random Selection
+//                while (is_selected[loc]) {
+//                    loc = rand() % query_num;
+//                }
+                unsigned loc = i; // Sequential Selection
+
                 index.get_candidate_queues(query_load + loc * dim, K, paras, queues_list[i]);
             }
             // Ended by Johnpzh
-            auto e = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> diff = e - s;
+//            auto e = std::chrono::high_resolution_clock::now();
+//            std::chrono::duration<double> diff = e - s;
             // Add by Johnpzh
 //            {// Basic output
 //                printf("L: %u "

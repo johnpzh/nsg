@@ -1,6 +1,37 @@
 #! /bin/bash
 
-#cd /home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests
+# Generate paired queries
+bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_pair_queries
+
+# SIFT
+data_path=/scratch/zpeng/sift1m
+data_name=sift
+k=200
+l=200
+output=output.${data_name}.txt
+echo "==== ${data_path}/${data_name} ===="
+${bin} ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}_paired_query.fvecs 500
+
+# GIST
+data_path=/scratch/zpeng/gist1m
+data_name=gist
+k=400
+l=400
+output=output.${data_name}.txt
+echo "==== ${data_path}/${data_name} ===="
+${bin} ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}_paired_query.fvecs 500
+
+# DEEP10M
+data_path=/scratch/zpeng/deep1b
+data_name=deep10M
+k=400
+l=400
+output=output.${data_name}.txt
+echo "==== ${data_path}/${data_name} ===="
+${bin} ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}_paired_query.fvecs 500
+
+
+# Measure percentage of shared candidates
 bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_search_shared_candidates
 
 # SIFT
@@ -10,7 +41,7 @@ k=200
 l=200
 output=output.${data_name}.txt
 echo "==== ${data_path}/${data_name} ===="
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.${data_name}.ivecs 20 | tee ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_paired_query.fvecs ${data_path}/${data_name}.nsg $l $k output.${data_name}.ivecs 20 | tee ${output}
 
 # GIST
 data_path=/scratch/zpeng/gist1m
@@ -19,7 +50,7 @@ k=400
 l=400
 output=output.${data_name}.txt
 echo "==== ${data_path}/${data_name} ===="
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.${data_name}.ivecs 20 | tee ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_paired_query.fvecs ${data_path}/${data_name}.nsg $l $k output.${data_name}.ivecs 20 | tee ${output}
 
 # DEEP10M
 data_path=/scratch/zpeng/deep1b
@@ -28,7 +59,7 @@ k=400
 l=400
 output=output.${data_name}.txt
 echo "==== ${data_path}/${data_name} ===="
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.${data_name}.ivecs 20 | tee ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_paired_query.fvecs ${data_path}/${data_name}.nsg $l $k output.${data_name}.ivecs 20 | tee ${output}
 
 ## FAKE
 #data_path=/scratch/zpeng/fake
