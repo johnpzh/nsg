@@ -1,6 +1,9 @@
 //
-// Created by 付聪 on 2017/6/21.
+// Created by Zhen Peng on 10/2/19.
 //
+/**
+ * Use OpenMP to run queries in parallel in the query level.
+ */
 
 #include <efanna2e/index_nsg.h>
 #include <efanna2e/util.h>
@@ -50,9 +53,9 @@ void save_result(const char *filename,
 
 int main(int argc, char **argv)
 {
-    if (argc != 8) {
+    if (argc != 9) {
         std::cout << argv[0]
-                  << " data_file query_file nsg_path search_L search_K result_path query_num_max"
+                  << " data_file query_file nsg_path search_L search_K result_path query_num_max num_threads_max"
                   << std::endl;
         exit(-1);
     }
@@ -91,9 +94,9 @@ int main(int argc, char **argv)
     paras.Set<unsigned>("L_search", L);
     paras.Set<unsigned>("P_search", L);
 
-    int num_threads_max = 1;
+    int num_threads_max = strtoull(argv[8], nullptr, 0);
     for (int num_threads = 1; num_threads < num_threads_max + 1; num_threads *= 2) {
-//        omp_set_num_threads(num_threads);
+        omp_set_num_threads(num_threads);
 //        std::vector <std::vector<unsigned>> res(query_num);
 //        for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
@@ -104,7 +107,7 @@ int main(int argc, char **argv)
             for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
             auto s = std::chrono::high_resolution_clock::now();
-//#pragma omp parallel for
+#pragma omp parallel for
             for (unsigned i = 0; i < query_num; i++) {
                 index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
             }
@@ -120,8 +123,27 @@ int main(int argc, char **argv)
             auto e = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = e - s;
             // Add by Johnpzh
-            {// Basic output
-                printf("L: %u "
+//            {// Basic output
+//                printf("L: %u "
+//                       "search_time(s.): %f "
+//                       "K: %u "
+//                       "Volume: %u "
+//                       "Dimension: %u "
+//                       "query_num: %u "
+//                       "query_per_sec: %f "
+//                       "average_latency(ms.): %f\n",
+//                       L,
+//                       diff.count(),
+//                       K,
+//                       points_num,
+//                       dim,
+//                       query_num,
+//                       query_num / diff.count(),
+//                       diff.count() * 1000 / query_num);
+//            }
+            {// Multi-thread
+                printf("num_threads: %u "
+                       "L: %u "
                        "search_time(s.): %f "
                        "K: %u "
                        "Volume: %u "
@@ -129,6 +151,7 @@ int main(int argc, char **argv)
                        "query_num: %u "
                        "query_per_sec: %f "
                        "average_latency(ms.): %f\n",
+                       num_threads,
                        L,
                        diff.count(),
                        K,

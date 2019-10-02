@@ -26,3 +26,12 @@ target_link_libraries(profile_search_shared_candidates ${PROJECT_NAME} -ltcmallo
 
 add_executable(profile_pair_queries profile_pair_queries.cpp)
 target_link_libraries(profile_pair_queries ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_same_query_set profile_same_query_set.cpp)
+target_link_libraries(profile_same_query_set ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_joint_traversal_search profile_joint_traversal_search.cpp)
+target_link_libraries(profile_joint_traversal_search ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_parallel_optimized_search profile_parallel_optimized_search.cpp)
+target_link_libraries(profile_parallel_optimized_search ${PROJECT_NAME} -ltcmalloc)

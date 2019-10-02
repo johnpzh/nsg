@@ -51,6 +51,13 @@ class IndexNSG : public Index {
             size_t K,
             const Parameters &parameters,
             std::vector< std::pair<unsigned, float> > &ngbrs);
+    void SearchWithOptGraph(
+            const float *query_load,
+            unsigned query_num,
+            unsigned query_dim,
+            size_t K,
+            const Parameters &parameters,
+            std::vector< std::vector<unsigned> > &res);
     void get_candidate_queues(
             const float *query,
             size_t K,
