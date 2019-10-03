@@ -58,9 +58,11 @@ void get_shared_percentage_of_two_queries(
         const std::vector< std::vector<unsigned> > &queues_b,
         std::vector<double> &percentages)
 {
-    size_t max_hops = std::max(queues_a.size(), queues_b.size());
+//    size_t max_hops = std::max(queues_a.size(), queues_b.size());
     size_t min_hops = std::min(queues_a.size(), queues_b.size());
-    percentages.resize(max_hops);
+
+//    percentages.resize(max_hops);
+    percentages.resize(min_hops);
 
     for (size_t q_i = 0; q_i < min_hops; ++q_i) {
         std::unordered_set<unsigned> pool;
@@ -79,9 +81,9 @@ void get_shared_percentage_of_two_queries(
         percentages[q_i] = 2.0 * shared_count / (double) (queues_a[q_i].size() + queues_b[q_i].size());
     }
 
-    for (size_t q_i = min_hops; q_i < max_hops; ++q_i) {
-        percentages[q_i] = 0.0;
-    }
+//    for (size_t q_i = min_hops; q_i < max_hops; ++q_i) {
+//        percentages[q_i] = 0.0;
+//    }
 }
 
 int main(int argc, char **argv)

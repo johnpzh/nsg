@@ -1284,7 +1284,7 @@ void IndexNSG::get_candidate_queues(
     int k = 0; // the index of the 1st unchecked vertices in retset.
     while (k < (int) L) {
         int nk = L; // the minimum insert location of new candidates
-        bool is_queue_updated = false;
+//        bool is_queue_updated = false;
         if (retset[k].flag) {
             retset[k].flag = false;
             unsigned n = retset[k].id;
@@ -1310,12 +1310,11 @@ void IndexNSG::get_candidate_queues(
                 // if(L+1 < retset.size()) ++L;
                 if (r < nk) nk = r;
 
-                {
-                    if (r < (int) L) {
-//                        push_back_retset(retset);
-                        is_queue_updated = true;
-                    }
-                }
+//                {
+//                    if (r < (int) L) {
+//                        is_queue_updated = true;
+//                    }
+//                }
             }
         }
         if (nk <= k) {
@@ -1324,9 +1323,10 @@ void IndexNSG::get_candidate_queues(
             ++k;
         }
         {
-            if (is_queue_updated) {
-                push_back_retset(retset);
-            }
+//            if (is_queue_updated) {
+//                push_back_retset(retset);
+//            }
+            push_back_retset(retset);
         }
     }
 }
