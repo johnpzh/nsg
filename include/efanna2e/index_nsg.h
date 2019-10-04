@@ -58,6 +58,11 @@ class IndexNSG : public Index {
             size_t K,
             const Parameters &parameters,
             std::vector< std::vector<unsigned> > &res);
+    void SearchWithOptGraphMeasurement(
+            const float *query,
+            size_t K,
+            const Parameters &parameters,
+            unsigned *indices);
     void get_candidate_queues(
             const float *query,
             size_t K,
@@ -73,6 +78,12 @@ class IndexNSG : public Index {
 //    double time_tree_grow;
 //    std::vector< std::pair<double, double> > time_neighbors_latencies; // Latency of top-L neighbors
 //    std::vector<uint32_t> count_neighbors_hops; // Hops of top-L neighbors
+    double time_distance_computation = 0.0;
+    double time_queue_operation = 0.0;
+    double time_initialization = 0.0;
+    double time_prefetch = 0.0;
+    double time_small_data_load = 0.0;
+
 
     // Ended by Johnpzh
 
