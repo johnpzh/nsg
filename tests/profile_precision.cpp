@@ -10,9 +10,10 @@
 #include <efanna2e/util.h>
 #include <chrono>
 #include <string>
+// Added by Johnpzh
 #include <omp.h>
 #include  "extras/utils.h"
-//#include <math.h>
+// Ended by Johnpzh
 
 void load_data(char *filename, float *&data, unsigned &num,
                unsigned &dim)
@@ -38,132 +39,44 @@ void load_data(char *filename, float *&data, unsigned &num,
     in.close();
 }
 
-void read_true_NN(
-        const char *filename,
-        unsigned query_num,
-        unsigned K,
-        std::vector <std::vector< std::pair<unsigned, float> > > &true_ress)
+void save_result(const char *filename,
+                 std::vector <std::vector<unsigned>> &results)
 {
-    std::ifstream fin(filename);
-    if (!fin.is_open()) {
-        fprintf(stderr, "Error: cannot open file %s\n", filename);
-        exit(EXIT_FAILURE);
-    }
-    unsigned t_query_num;
-    unsigned t_K;
-    fin.read(reinterpret_cast<char *>(&t_query_num), sizeof(t_query_num));
-    fin.read(reinterpret_cast<char *>(&t_K), sizeof(t_K));
-    if (t_query_num != query_num) {
-        fprintf(stderr, "Error: query_num %u is not equal to the record %u in true-NN file %s\n",
-                query_num, t_query_num, filename);
-        exit(EXIT_FAILURE);
-    }
-    if (t_K != K) {
-        fprintf(stderr, "Error: K %u is not equal to the record %u in true-NN file %s\n",
-                K, t_K, filename);
-        exit(EXIT_FAILURE);
-    }
-    true_ress.resize(t_query_num);
-    for (unsigned q_i = 0; q_i < t_query_num; ++q_i) {
-        true_ress[q_i].resize(t_K);
-//        printf("%u:\n", q_i); //test
-        for (unsigned n_i = 0; n_i < t_K; ++n_i) {
-            unsigned id;
-            float dist;
-            fin.read(reinterpret_cast<char *>(&id), sizeof(id));
-            fin.read(reinterpret_cast<char *>(&dist), sizeof(dist));
-            true_ress[q_i][n_i].first = id;
-            true_ress[q_i][n_i].second = dist;
-//            {//test
-//                printf("[%u %f]\n", id, dist);
-//            }
-        }
-    }
+    std::ofstream out(filename, std::ios::binary | std::ios::out);
 
-    fin.close();
-}
-
-// Function: get one precision of a single query
-float get_single_precision(
-        const std::vector< std::pair<unsigned, float> > &query_res,
-        const std::vector< std::pair<unsigned, float> > &true_res)
-{
-    assert(query_res.size() == true_res.size());
-    size_t count = 0;
-    for (const auto &qr : query_res) {
-//        {//test
-//            printf("query_res: [%u %f]\n", qr.first, qr.second);
-//        }
-        for (const auto &tr : true_res) {
-//            printf("[%u %f] ", tr.first, tr.second);
-            if (qr.first == tr.first) {
-                ++count;
-                break;
-            } else if (qr.second == tr.second) {
-                ++count;
-                break;
-            }
-        }
-//        printf("\n\n");
+    for (unsigned i = 0; i < results.size(); i++) {
+        unsigned GK = (unsigned) results[i].size();
+        out.write((char *) &GK, sizeof(unsigned));
+        out.write((char *) results[i].data(), GK * sizeof(unsigned));
     }
-
-    return (float) (1.0 * count / query_res.size());
-}
-
-// Function: get the mean precision
-float get_final_precision(
-        const std::vector<float> &precisions)
-{
-    double tmp_sum = 0;
-
-    for (float p : precisions) {
-        tmp_sum += p;
-//        printf("p: %f\n", p);
-    }
-    tmp_sum /= precisions.size();
-    ////////////////////////////////////
-    // Geometric mean, but not suitable if zero exits
-//    for (float p : precisions) {
-//        tmp_sum += log(p);
-//    }
-//    // ret = antilog( (log(1) + log(2) + . . . + log(n)) / n )
-//    tmp_sum /= precisions.size();
-//    tmp_sum = exp(tmp_sum);
-
-    return (float) tmp_sum;
+    out.close();
 }
 
 int main(int argc, char **argv)
 {
-    if (argc != 8) {
+    if (argc != 9) {
         std::cout << argv[0]
-                  << " data_file query_file nsg_path search_L search_K true-NN_path query_num_max"
+                  << " data_file query_file nsg_path search_L search_K result_path query_num_max true_NN_file"
                   << std::endl;
         exit(-1);
     }
     setbuf(stdout, nullptr); // Added by Johnpzh
-    float *data_load = nullptr;
+    float *data_load = NULL;
     unsigned points_num, dim;
     load_data(argv[1], data_load, points_num, dim);
-    float *query_load = nullptr;
+    float *query_load = NULL;
     unsigned query_num, query_dim;
     load_data(argv[2], query_load, query_num, query_dim);
     assert(dim == query_dim);
-    {//test
-        printf("points_num: %u dim: %u query_num: %u\n", points_num, dim, query_num);
-        exit(1);
-    }
+    // Added by Johnpzh
+    unsigned query_num_max = strtoull(argv[7], nullptr, 0);
+    if (query_num > query_num_max) query_num = query_num_max;
+//        printf("query_num: %u\n", query_num);
+    // Ended by Johnpzh
 
     unsigned L = strtoull(argv[4], nullptr, 0);
     unsigned K = strtoull(argv[5], nullptr, 0);
-    {
-        unsigned query_num_max = strtoull(argv[7], nullptr, 0);
-        if (query_num > query_num_max) {
-            query_num = query_num_max;
-        }
-//        printf("query_num: %u\n", query_num);
-//        printf("K: %u\n", K);
-    }
+
     if (L < K) {
         std::cout << "search_L cannot be smaller than search_K!" << std::endl;
         exit(-1);
@@ -176,40 +89,109 @@ int main(int argc, char **argv)
     index.Load(argv[3]);
     index.OptimizeGraph(data_load);
 
+    // Load true-NN
+    unsigned *query_true_NN = nullptr;
+    unsigned t_K;
+    index.load_true_NN(argv[8], query_true_NN, t_K);
+    std::unordered_map<unsigned, double> recalls;
+    recalls[5] = 0.0;
+    recalls[10] = 0.0;
+    recalls[20] = 0.0;
+    recalls[50] = 0.0;
+    recalls[100] = 0.0;
+
     efanna2e::Parameters paras;
     paras.Set<unsigned>("L_search", L);
     paras.Set<unsigned>("P_search", L);
 
-    // Read the true-NN_file
-    std::vector <std::vector< std::pair<unsigned, float> > > true_ress;
-    read_true_NN(argv[6], query_num, K, true_ress);
+    int num_threads_max = 1;
+    for (int num_threads = 1; num_threads < num_threads_max + 1; num_threads *= 2) {
+//        omp_set_num_threads(num_threads);
+//        std::vector <std::vector<unsigned>> res(query_num);
+//        for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
-    std::vector< std::pair<unsigned, float> > query_res(query_num); // [].first: id, [].second: distance.
-    std::vector<float> precisions(query_num);
-    auto s = std::chrono::high_resolution_clock::now(); // commented by Johnpzh
+        // Added by Johnpzh
+        int warmup_max = 1;
+        for (int warmup = 0; warmup < warmup_max; ++warmup) {
+            std::vector<std::vector<unsigned>> res(query_num);
+            for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
 
-    // Query
-    for (unsigned i = 0; i < query_num; i++) {
-        index.SearchWithOptGraph(query_load + i * dim, K, paras, query_res);
-        float single_precision = get_single_precision(query_res, true_ress[i]);
-        precisions[i] = single_precision;
-//        {//test
-//            printf("single_precision: %f\n", single_precision);
-//        }
+            auto s = std::chrono::high_resolution_clock::now();
+//#pragma omp parallel for
+            for (unsigned i = 0; i < query_num; i++) {
+                index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
+            }
+                ///////////////////////////////
+                //
+//          auto s = std::chrono::high_resolution_clock::now(); // commented by Johnpzh
+//          for (unsigned i = 0; i < query_num; i++) {
+//            index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
+//          }
+            //
+            /////////////////////////////
+            // Ended by Johnpzh
+            auto e = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> diff = e - s;
+            // Add by Johnpzh
+            {// Basic output
+                printf("L: %u "
+                       "search_time(s.): %f "
+                       "K: %u "
+                       "Volume: %u "
+                       "Dimension: %u "
+                       "query_num: %u "
+                       "query_per_sec: %f "
+                       "average_latency(ms.): %f\n",
+                       L,
+                       diff.count(),
+                       K,
+                       points_num,
+                       dim,
+                       query_num,
+                       query_num / diff.count(),
+                       diff.count() * 1000 / query_num);
+
+
+
+                index.get_recall_for_all_queries(
+                        query_num,
+                        t_K,
+                        query_true_NN,
+                        res,
+                        recalls);
+                printf("P@5: %f\n"
+                       "P@10: %f\n"
+                       "P@20: %f\n"
+                       "P@50: %f\n"
+                       "P@100: %f\n",
+                       recalls[5],
+                       recalls[10],
+                       recalls[20],
+                       recalls[50],
+                       recalls[100]);
+                recalls[5] = 0.0;
+                recalls[10] = 0.0;
+                recalls[20] = 0.0;
+                recalls[50] = 0.0;
+                recalls[100] = 0.0;
+            }
+
+//            printf("num_threads: %u "
+//                   "search_time: %f "
+//                   "memvirt: %.2fMB memres: %.2fMB "
+//                   "memtotal: %.2fMB memfree: %.2fMB\n",
+//                   num_threads,
+//                   diff.count(),
+//                   memvirt, memres,
+//                   memtotal, memfree);
+            // Ended by Johnpzh
+
+            save_result(argv[6], res);
+        }
     }
 
-    // Final precision
-    float final_precision = get_final_precision(precisions);
-    auto e = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = e - s;
-    printf("L: %u mean_precision: %f K: %u query_num: %u run_time: %f seconds\n",
-            L, final_precision, K, query_num, diff.count());
-//    std::cout << "run_time: " << diff.count() << "\n";
-
-//    save_result(argv[6], res);
-    delete [] data_load;
-    delete [] query_load;
+    delete[] data_load;
+    delete[] query_load;
+    delete[] query_true_NN;
     return 0;
 }
-
-

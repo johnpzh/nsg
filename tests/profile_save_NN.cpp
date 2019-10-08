@@ -85,6 +85,10 @@ int main(int argc, char **argv)
 
     unsigned K = strtoull(argv[4], nullptr, 0);
     {
+        if (K < 100) {
+            fprintf(stderr, "Error: K %u is smaller than 100.\n", K);
+            exit(EXIT_FAILURE);
+        }
         unsigned query_num_max = strtoull(argv[6], nullptr, 0);
         if (query_num > query_num_max) {
             query_num = query_num_max;

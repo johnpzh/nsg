@@ -1644,4 +1644,82 @@ void IndexNSG::get_candidate_queues(
     }
 }
 
+/**
+ * Load those true top-K neighbors (ground truth) of quries
+ * @param filename
+ * @param[out] data
+// * @param query_num
+ * @param[out] t_K Value of K for top-K true neighbors
+ */
+void IndexNSG::load_true_NN(
+        const char *filename,
+        unsigned *&data,
+//        unsigned query_num,
+        unsigned &t_K)
+{
+    std::ifstream fin(filename);
+    if (!fin.is_open()) {
+        fprintf(stderr, "Error: cannot open file %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+    unsigned t_query_num;
+//    unsigned t_K;
+    fin.read(reinterpret_cast<char *>(&t_query_num), sizeof(t_query_num));
+    fin.read(reinterpret_cast<char *>(&t_K), sizeof(t_K));
+//    if (t_query_num != query_num) {
+//        fprintf(stderr, "Error: query_num %u is not equal to the record %u in true-NN file %s\n",
+//                query_num, t_query_num, filename);
+//        exit(EXIT_FAILURE);
+//    }
+
+    data = new unsigned[(size_t) t_query_num * (size_t) t_K];
+
+    for (unsigned q_i = 0; q_i < t_query_num; ++q_i) {
+        size_t offset = q_i * t_K;
+        for (unsigned n_i = 0; n_i < t_K; ++n_i) {
+            unsigned id;
+            float dist;
+            fin.read(reinterpret_cast<char *>(&id), sizeof(id));
+            fin.read(reinterpret_cast<char *>(&dist), sizeof(dist));
+            data[offset + n_i] = id;
+        }
+    }
+
+    fin.close();
+}
+
+void IndexNSG::get_recall_for_all_queries(
+        unsigned query_num,
+        unsigned t_K,
+        const unsigned *query_true_NN,
+        const std::vector<std::vector<unsigned>> &queries_result_NN,
+        std::unordered_map<unsigned, double> &recalls)
+{
+    if (t_K < 100) {
+        fprintf(stderr, "Error: t_K %u is smaller than 100.\n", t_K);
+        exit(EXIT_FAILURE);
+    }
+
+    for (unsigned q_i = 0; q_i < query_num; ++q_i) {
+        size_t offset = q_i * t_K;
+        for (unsigned top_i = 0; top_i < 100; ++top_i) {
+            unsigned true_id = query_true_NN[offset + top_i];
+            for (unsigned n_i = 0; n_i < 100; ++n_i) {
+                if (queries_result_NN[q_i][n_i] == true_id) {
+                    if (n_i < 5) recalls[5] += 1;
+                    if (n_i < 10) recalls[10] += 1;
+                    if (n_i < 20) recalls[20] += 1;
+                    if (n_i < 50) recalls[50] += 1;
+                    if (n_i < 100) recalls[100] += 1;
+                }
+            }
+        }
+    }
+    recalls[5] /= 5.0 * query_num;
+    recalls[10] /= 10.0 * query_num;
+    recalls[20] /= 20.0 * query_num;
+    recalls[50] /= 50.0 * query_num;
+    recalls[100] /= 100.0 * query_num;
+}
+
 } // namespace efanna2e

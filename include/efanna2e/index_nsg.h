@@ -77,6 +77,17 @@ class IndexNSG : public Index {
             size_t K,
             const Parameters &parameters,
             std::vector< std::vector<unsigned> > &queues);
+    void load_true_NN(
+            const char *filename,
+            unsigned *&data,
+//            unsigned query_num,
+            unsigned &t_K);
+    void get_recall_for_all_queries(
+            unsigned query_num,
+            unsigned K,
+            const unsigned *query_true_NN,
+            const std::vector<std::vector<unsigned>> &queries_result_NN,
+            std::unordered_map<unsigned, double> &recalls);
     // For profiling.
 //    double time_medoid;
 //    uint64_t count_distance_computation = 0;
