@@ -131,21 +131,35 @@ int main(int argc, char **argv)
                        query_num,
                        query_num / diff.count(),
                        diff.count() * 1000 / query_num);
-                printf("time_initialization(s.): %f %.2f%%\n"
+                printf(
+//                       "time_initialization(s.): %f %.2f%%\n"
                        "time_small_data_load(s.): %f %.2f%%\n"
                        "time_prefetch(s.): %f %.2f%%\n"
                        "time_queue_operation(s.): %f %.2f%%\n"
-                       "time_distance_computation(s.): %f %.2f%%\n",
-                       index.time_initialization, 100.0 * index.time_initialization / diff.count(),
+                       "time_distance_computation(s.): %f %.2f%%\n"
+//                       "time_queue_status(s.): %f %.2f%%\n"
+                       "time_neighbor_traverse(s.): %f %.2f%%\n",
+//                       "time_result_copy(s.): %f %.2f%%\n"
+//                       "time_misc_operations(s.): %f %.2f%%\n",
+//                       index.time_initialization, 100.0 * index.time_initialization / diff.count(),
                        index.time_small_data_load, 100.0 * index.time_small_data_load / diff.count(),
                        index.time_prefetch, 100.0 * index.time_prefetch / diff.count(),
                        index.time_queue_operation, 100.0 * index.time_queue_operation / diff.count(),
-                       index.time_distance_computation, 100.0 * index.time_distance_computation / diff.count());
-                index.time_initialization = 0.0;
+                       index.time_distance_computation, 100.0 * index.time_distance_computation / diff.count(),
+//                       index.time_queue_status, 100.0 * index.time_queue_status / diff.count(),
+                       index.time_neighbor_traverse, 100.0 * index.time_neighbor_traverse / diff.count()
+//                       index.time_result_copy, 100.0 * index.time_result_copy / diff.count(),
+//                       index.time_misc_operations, 100.0 * index.time_misc_operations / diff.count()
+                       );
+//                index.time_initialization = 0.0;
                 index.time_small_data_load = 0.0;
                 index.time_prefetch = 0.0;
                 index.time_queue_operation = 0.0;
                 index.time_distance_computation = 0.0;
+//                index.time_queue_status = 0.0;
+                index.time_neighbor_traverse = 0.0;
+//                index.time_result_copy = 0.0;
+//                index.time_misc_operations = 0.0;
             }
 
 //            printf("num_threads: %u "

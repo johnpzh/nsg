@@ -58,6 +58,15 @@ class IndexNSG : public Index {
             size_t K,
             const Parameters &parameters,
             std::vector< std::vector<unsigned> > &res);
+    void SearchWithOptGraph(
+            const float *query_load,
+            unsigned query_num,
+            unsigned query_dim,
+            unsigned query_batch_start,
+            unsigned query_batch_size,
+            size_t K,
+            const Parameters &parameters,
+            std::vector< std::vector<unsigned> > &res);
     void SearchWithOptGraphMeasurement(
             const float *query,
             size_t K,
@@ -80,9 +89,13 @@ class IndexNSG : public Index {
 //    std::vector<uint32_t> count_neighbors_hops; // Hops of top-L neighbors
     double time_distance_computation = 0.0;
     double time_queue_operation = 0.0;
-    double time_initialization = 0.0;
+//    double time_initialization = 0.0; // too short
     double time_prefetch = 0.0;
     double time_small_data_load = 0.0;
+//    double time_queue_status = 0.0; // too short
+    double time_neighbor_traverse = 0.0;
+//    double time_result_copy = 0.0; // too short
+//    double time_misc_operations = 0.0; // too fine-grained
 
 
     // Ended by Johnpzh

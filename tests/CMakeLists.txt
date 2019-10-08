@@ -38,3 +38,6 @@ target_link_libraries(profile_parallel_optimized_search ${PROJECT_NAME} -ltcmall
 
 add_executable(profile_breakdown_optimized_searching profile_breakdown_optimized_searching.cpp)
 target_link_libraries(profile_breakdown_optimized_searching ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_batched_joint_traversal_search profile_batched_joint_traversal_search.cpp)
+target_link_libraries(profile_batched_joint_traversal_search ${PROJECT_NAME} -ltcmalloc)
