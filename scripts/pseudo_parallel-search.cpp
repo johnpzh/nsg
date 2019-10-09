@@ -2,6 +2,36 @@
 // Created by Zhen Peng on 9/26/19.
 //
 
+// Input is a group of queries, not the whole query set.
+void parallel_searching_2()
+{
+    // The start point
+    for (every neighbor n : Vertex p) {
+        for (every query q : Group Qs) {
+            Queue Ss[q].add(n); // Use binary-search-and-insert to make Ss[q] in order of the distance to q.
+        }
+    }
+
+    // Put all top ones in a joint queue
+    for (every queue s : Queues Ss) {
+        JointQueue jq.add(s[0]);
+    }
+
+    While (JointQueue jq is not empty) {
+        for (every vertex v : JointQueue jq) {
+            // Mark as selected for that Query?
+            // TODO: so I need another flag array to mark which queries this vertex v belongs to.
+            for (every query q_i : Vertex v is the top-1 of query q_i) {
+                BitMap is_visited[v][q_i] = true;
+            }
+            // Push v's neighbors to its dominated query's queue
+
+        }
+
+        // Form the new JointQueue from all query's queues
+    }
+}
+
 // Function: answer a bunch of queries in parallel.
 // Assume queries are well-grouped into GQs. Queries in a group get the same final candidates.
 void parallel_searching_1(

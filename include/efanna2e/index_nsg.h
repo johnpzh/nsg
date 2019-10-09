@@ -42,7 +42,7 @@ class IndexNSG : public Index {
 
 
     // Added by Johnpzh
-     void  get_true_NN(
+    void  get_true_NN(
             const float *query,
             unsigned K,
             std::vector< std::pair<unsigned, float> > &ngbrs);
@@ -88,6 +88,10 @@ class IndexNSG : public Index {
             const unsigned *query_true_NN,
             const std::vector<std::vector<unsigned>> &queries_result_NN,
             std::unordered_map<unsigned, double> &recalls);
+    void BuildReverse(
+            size_t n,
+            const float *data,
+            const Parameters &parameters);
     // For profiling.
 //    double time_medoid;
 //    uint64_t count_distance_computation = 0;

@@ -41,3 +41,6 @@ target_link_libraries(profile_breakdown_optimized_searching ${PROJECT_NAME} -ltc
 
 add_executable(profile_batched_joint_traversal_search profile_batched_joint_traversal_search.cpp)
 target_link_libraries(profile_batched_joint_traversal_search ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_reversed_nsg_index profile_reversed_nsg_index.cpp)
+target_link_libraries(profile_reversed_nsg_index ${PROJECT_NAME} -ltcmalloc)

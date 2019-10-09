@@ -57,6 +57,10 @@ void IndexNSG::Load(const char *filename) {
 
 void IndexNSG::Load_nn_graph(const char *filename) {
     std::ifstream in(filename, std::ios::binary);
+    if (!in.is_open()) {
+        fprintf(stderr, "Error: cannot open file %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
     unsigned k;
     in.read((char *) &k, sizeof(unsigned));
     in.seekg(0, std::ios::end);
@@ -1720,6 +1724,80 @@ void IndexNSG::get_recall_for_all_queries(
     recalls[20] /= 20.0 * query_num;
     recalls[50] /= 50.0 * query_num;
     recalls[100] /= 100.0 * query_num;
+}
+
+/**
+ * Build the NSG graph but with reversed edges.
+ * @param n
+ * @param data
+ * @param parameters
+ */
+void IndexNSG::BuildReverse(
+        size_t n,
+        const float *data,
+        const Parameters &parameters)
+{
+    std::string nn_graph_path = parameters.Get<std::string>("nn_graph_path");
+    unsigned range = parameters.Get<unsigned>("R");
+    Load_nn_graph(nn_graph_path.c_str());
+    data_ = data;
+    init_graph(parameters);
+    SimpleNeighbor *cut_graph_ = new SimpleNeighbor[nd_ * (size_t) range];
+    Link(parameters, cut_graph_);
+    final_graph_.resize(nd_);
+
+    for (size_t i = 0; i < nd_; i++) {
+        SimpleNeighbor *pool = cut_graph_ + i * (size_t) range;
+        unsigned pool_size = 0;
+        for (unsigned j = 0; j < range; j++) {
+            if (pool[j].distance == -1) break;
+            pool_size = j;
+        }
+        pool_size++;
+        final_graph_[i].resize(pool_size);
+        for (unsigned j = 0; j < pool_size; j++) {
+            final_graph_[i][j] = pool[j].id;
+        }
+    }
+    tree_grow(parameters);
+
+    {// Reverse the graph
+        std::vector< std::vector<unsigned> > reversed_list(nd_);
+
+        for (unsigned head = 0; head < nd_; ++head) {
+            for (unsigned i_tail = 0; i_tail < final_graph_[head].size(); ++i_tail) {
+                unsigned tail = final_graph_[head][i_tail];
+                reversed_list[tail].push_back(head);
+            }
+        }
+        final_graph_.swap(reversed_list);
+
+        unsigned max_degree = 0;
+        unsigned min_degree = (unsigned) -1;
+        unsigned avg_degree = 0;
+        for (const auto &row : reversed_list) {
+            auto degree = row.size();
+            max_degree = degree > max_degree ? degree : max_degree;
+            min_degree = degree < min_degree ? degree : min_degree;
+            avg_degree += degree;
+        }
+        avg_degree /= nd_;
+        printf("Original_Degree_Statistics: Max: %u Min: %u Avg: %u\n", max_degree, min_degree, avg_degree);
+    }
+    unsigned max = 0, min = 1e6, avg = 0;
+    for (size_t i = 0; i < nd_; i++) {
+        auto size = final_graph_[i].size();
+        max = max < size ? size : max;
+        min = min > size ? size : min;
+        avg += size;
+    }
+    if (max > width) {
+        width = max; // Careful!
+    }
+    avg /= 1.0 * nd_;
+    printf("Reversed_Degree_Statistics: Max: %d Min: %d Avg: %d\n", max, min, avg);
+
+    has_built = true;
 }
 
 } // namespace efanna2e

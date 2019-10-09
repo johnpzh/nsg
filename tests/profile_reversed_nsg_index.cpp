@@ -1,5 +1,5 @@
 //
-// Created by 付聪 on 2017/6/21.
+// Created by Zhen Peng 10/9/19.
 //
 
 #include <efanna2e/index_nsg.h>
@@ -53,7 +53,8 @@ int main(int argc, char** argv) {
   paras.Set<unsigned>("C", C);
   paras.Set<std::string>("nn_graph_path", nn_graph_path);
 
-  index.Build(points_num, data_load, paras);
+  index.BuildReverse(points_num, data_load, paras);
+//  index.Build(points_num, data_load, paras);
   auto e = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = e - s;
 
