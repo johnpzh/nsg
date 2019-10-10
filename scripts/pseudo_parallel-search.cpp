@@ -3,32 +3,63 @@
 //
 
 // Input is a group of queries, not the whole query set.
-void parallel_searching_2()
+// Output is that every query (q) in the group get a queue (QS[q]) as its final nearest candidates.
+void parallel_searching_2(
+        Graph G,
+        Vertex P, // The start/entry point
+        SearchSize L_search, // Candidate pool size
+        Group GQ, // The group of quries
+        Queues QS // Every query in the group has a queue of final nearest neighbors
+        )
 {
     // The start point
-    for (every neighbor n : Vertex p) {
-        for (every query q : Group Qs) {
-            Queue Ss[q].add(n); // Use binary-search-and-insert to make Ss[q] in order of the distance to q.
+    for (every Query q : Group GQ) {
+        Queue QS[q].add(P);
+    }
+    for (every Neighbor n : Vertex P) {
+        for (every Query q : Group GQ) {
+            Queue QS[q].add(n); // Use binary-search-and-insert to make QS[q] in the order to the distance to q.
+            BitMap is_visited[n][q] = true; // Mark Vertex n is visited by Query q
         }
     }
 
     // Put all top ones in a joint queue
-    for (every queue s : Queues Ss) {
-        JointQueue jq.add(s[0]);
+    for (every Query q : Group GQ) {
+        Vertex v = QS[q][0]; // Vertex v is Query q's top-1 selection.
+        Mark Vertex v as checked by Query q;
+        List t_one[v].add(q); // List t_one records which queries have selected Vertex v as their top-1.
+        if (Vertex v is not in JointQueue jq) {
+            JointQueue jq.add(v); // Add the top-1 into the joint queue.
+        }
     }
 
-    While (JointQueue jq is not empty) {
-        for (every vertex v : JointQueue jq) {
-            // Mark as selected for that Query?
-            // TODO: so I need another flag array to mark which queries this vertex v belongs to.
-            for (every query q_i : Vertex v is the top-1 of query q_i) {
-                BitMap is_visited[v][q_i] = true;
+    while (JointQueue jq is not empty) {
+        for (every Vertex v : JointQueue jq) {
+            // Push v's neighbors to its selector queries' queues.
+            for (every Neighbor n : Vertex v) {
+                for (every Query q : List t_one[v]) {
+                    if (!is_visited[n][q]) {
+                        BitMap is_visited[n][q] = true; // Mark Vertex n is visited by Query q
+                        Queues QS[q].add(n); // Use binary-search-and-insert to make QS[q] in the order to the distance to q.
+                    }
+                }
             }
-            // Push v's neighbors to its dominated query's queue
-
+            List t_one[v].clear();
         }
-
+        JointQueue jq.clear();
+        
         // Form the new JointQueue from all query's queues
+        for (every Query q : Group GQ) {
+            Vertex v = the first unchecked vertex in Queue QS[q]; // Vertex v is Query q's top-1 selection.
+            Index i = the index of Vertex v in Queue QS[q];
+            if (i >= L_search)
+                continue; // Stop condition.
+            Mark Vertex v as checked by Query q;
+            List t_one[v].add(q); // List t_one records which queries have selected Vertex v as their top-1.
+            if (Vertex v is not in JointQueue jq) {
+                JointQueue jq.add(v);
+            }
+        }
     }
 }
 
