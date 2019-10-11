@@ -88,9 +88,9 @@ void get_shared_percentage_of_two_queries(
 
 int main(int argc, char **argv)
 {
-    if (argc != 8) {
+    if (argc != 7) {
         std::cout << argv[0]
-                  << " data_file query_file nsg_path search_L search_K result_path query_num_max"
+                  << " data_file query_file nsg_path search_L search_K query_num_max"
                   << std::endl;
         exit(-1);
     }
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
     load_data(argv[2], query_load, query_num, query_dim);
     assert(dim == query_dim);
     // Added by Johnpzh
-    unsigned query_num_max = strtoull(argv[7], nullptr, 0);
+    unsigned query_num_max = strtoull(argv[6], nullptr, 0);
     if (query_num < query_num_max) query_num_max = query_num;
     // Ended by Johnpzh
 

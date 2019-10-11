@@ -47,7 +47,7 @@ void parallel_searching_2(
             List t_one[v].clear();
         }
         JointQueue jq.clear();
-        
+
         // Form the new JointQueue from all query's queues
         for (every Query q : Group GQ) {
             Vertex v = the first unchecked vertex in Queue QS[q]; // Vertex v is Query q's top-1 selection.
