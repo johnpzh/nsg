@@ -146,13 +146,22 @@ int main(int argc, char **argv)
             }
             {// Shared Percentage
                 double avg_ratio = 0;
+                double max_ratio = 0;
+                double min_ratio = 1;
                 for (unsigned q_i = 0; q_i < query_num_max; q_i += 2) {
                     double ratio = get_shared_percentage_of_tops(tops_list[q_i], tops_list[q_i + 1]);
-                    printf("%u_vs_%u: %f\n", q_i, q_i + 1, ratio);
+//                    if (ratio != 0.0) {
+//                        printf("%u_vs_%u: %f\n", q_i, q_i + 1, ratio);
+//                    }
+                    if (ratio > max_ratio) {
+                        max_ratio = ratio;
+                    } else if (ratio < min_ratio) {
+                        min_ratio = ratio;
+                    }
                     avg_ratio += ratio;
                 }
                 avg_ratio /= (query_num_max / 2);
-                printf("avg_ratio: %f\n", avg_ratio);
+                printf("avg_ratio: %f min_ratio: %f max_ratio: %f\n", avg_ratio, min_ratio, max_ratio);
             }
             // Ended by Johnpzh
 

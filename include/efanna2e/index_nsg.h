@@ -97,6 +97,8 @@ class IndexNSG : public Index {
             size_t K,
             const Parameters &parameters,
             std::vector<unsigned> &tops);
+    void DegreeDistribution(
+            std::vector<unsigned> &degree_to_count);
     // For profiling.
 //    double time_medoid;
 //    uint64_t count_distance_computation = 0;

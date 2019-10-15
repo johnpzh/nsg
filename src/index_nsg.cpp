@@ -1924,4 +1924,25 @@ void IndexNSG::get_top_ranks(
 //    }
 }
 
+/**
+ * Get graph degree distribution.
+ * @param[out] degree_to_count
+ */
+void IndexNSG::DegreeDistribution(
+        std::vector<unsigned> &degree_to_count)
+{
+    unsigned max_degree = 0;
+    for (unsigned v_i = 0; v_i < nd_; ++v_i) {
+        unsigned degree = final_graph_[v_i].size();
+        if (degree > max_degree) {
+            max_degree = degree;
+        }
+    }
+
+    degree_to_count.resize(max_degree + 1);
+    for (unsigned v_i = 0; v_i < nd_; ++v_i) {
+        unsigned degree = final_graph_[v_i].size();
+        ++degree_to_count[degree];
+    }
+}
 } // namespace efanna2e

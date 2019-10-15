@@ -47,3 +47,6 @@ target_link_libraries(profile_reversed_nsg_index ${PROJECT_NAME} -ltcmalloc)
 
 add_executable(profile_search_shared_tops profile_search_shared_tops.cpp)
 target_link_libraries(profile_search_shared_tops ${PROJECT_NAME} -ltcmalloc)
+
+add_executable(profile_graph_degree_distribution profile_graph_degree_distribution.cpp)
+target_link_libraries(profile_graph_degree_distribution ${PROJECT_NAME} -ltcmalloc)

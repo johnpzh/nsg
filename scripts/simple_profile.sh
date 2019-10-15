@@ -1,50 +1,120 @@
 #! /bin/bash
 
 
-# Try Reversed NSG searching
-bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_precision
+# Graph Degree Distribution
+bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_graph_degree_distribution
 
 # SIFT
 data_path=/scratch/zpeng/sift1m
 data_name=sift
-k=100
-l=100
-#k=200
-#l=200
+k=200
+l=200
 output=output.${data_name}.txt
 echo "---- ${data_path}/${data_name} ----"
-echo "Original_NSG"
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
-echo "Reversed_NSG"
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.reversed.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
+echo "Original Graph" | tee ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}.nsg | tee -a ${output}
+echo "Reversed Graph" | tee -a ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}.reversed.nsg | tee -a ${output}
 
 # GIST
 data_path=/scratch/zpeng/gist1m
 data_name=gist
-k=100
-l=100
-#k=400
-#l=400
+k=400
+l=400
 output=output.${data_name}.txt
 echo "---- ${data_path}/${data_name} ----"
-echo "Original_NSG"
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000  ${data_path}/${data_name}.true-100_NN.q-1000.binary
-echo "Reversed_NSG"
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.reversed.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-1000.binary
+echo "Original Graph" | tee ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}.nsg | tee -a ${output}
+echo "Reversed Graph" | tee -a ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}.reversed.nsg | tee -a ${output}
 
 # DEEP10M
 data_path=/scratch/zpeng/deep1b
 data_name=deep10M
-k=100
-l=100
-#k=400
-#l=400
+k=400
+l=400
 output=output.${data_name}.txt
 echo "---- ${data_path}/${data_name} ----"
-echo "Original_NSG"
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
-echo "Reversed_NSG"
-${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.reversed.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
+echo "Original Graph" | tee ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}.nsg | tee -a ${output}
+echo "Reversed Graph" | tee -a ${output}
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}.reversed.nsg | tee -a ${output}
+
+#
+## Measure shared top-ranked
+#bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_search_shared_tops
+#
+## SIFT
+#data_path=/scratch/zpeng/sift1m
+#data_name=sift
+#k=200
+#l=200
+#output=output.${data_name}.txt
+#echo "---- ${data_path}/${data_name} ----"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_paired_query.fvecs ${data_path}/${data_name}.nsg $l $k 10000
+#
+## GIST
+#data_path=/scratch/zpeng/gist1m
+#data_name=gist
+#k=400
+#l=400
+#output=output.${data_name}.txt
+#echo "---- ${data_path}/${data_name} ----"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_paired_query.fvecs ${data_path}/${data_name}.nsg $l $k 1000
+#
+## DEEP10M
+#data_path=/scratch/zpeng/deep1b
+#data_name=deep10M
+#k=400
+#l=400
+#output=output.${data_name}.txt
+#echo "---- ${data_path}/${data_name} ----"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_paired_query.fvecs ${data_path}/${data_name}.nsg $l $k 10000
+
+## Try Reversed NSG searching
+#bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_precision
+#
+## SIFT
+#data_path=/scratch/zpeng/sift1m
+#data_name=sift
+#k=100
+#l=100
+##k=200
+##l=200
+#output=output.${data_name}.txt
+#echo "---- ${data_path}/${data_name} ----"
+#echo "Original_NSG"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
+#echo "Reversed_NSG"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.reversed.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
+#
+## GIST
+#data_path=/scratch/zpeng/gist1m
+#data_name=gist
+#k=100
+#l=100
+##k=400
+##l=400
+#output=output.${data_name}.txt
+#echo "---- ${data_path}/${data_name} ----"
+#echo "Original_NSG"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000  ${data_path}/${data_name}.true-100_NN.q-1000.binary
+#echo "Reversed_NSG"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.reversed.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-1000.binary
+#
+## DEEP10M
+#data_path=/scratch/zpeng/deep1b
+#data_name=deep10M
+#k=100
+#l=100
+##k=400
+##l=400
+#output=output.${data_name}.txt
+#echo "---- ${data_path}/${data_name} ----"
+#echo "Original_NSG"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
+#echo "Reversed_NSG"
+#${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.reversed.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.true-100_NN.q-10000.binary
 
 ## Generate Reversed NSG
 #bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_reversed_nsg_index

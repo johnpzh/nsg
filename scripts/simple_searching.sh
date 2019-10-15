@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd /home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests
+bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/test_nsg_optimized_search
 
 # SIFT
 data_path=/scratch/zpeng/sift1m
@@ -8,7 +8,7 @@ data_name=sift
 k=200
 l=200
 echo "==== ${data_path}/${data_name} ===="
-./test_nsg_optimized_search ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k sift.ivecs 10000
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k sift.ivecs 10000
 
 # GIST
 data_path=/scratch/zpeng/gist1m
@@ -16,7 +16,7 @@ data_name=gist
 k=400
 l=400
 echo "==== ${data_path}/${data_name} ===="
-./test_nsg_optimized_search ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k gist.ivecs 10000
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k gist.ivecs 10000
 
 # DEEP10M
 data_path=/scratch/zpeng/deep1b
@@ -24,7 +24,7 @@ data_name=deep10M
 k=400
 l=400
 echo "==== ${data_path}/${data_name} ===="
-./test_nsg_optimized_search ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k deep10M.ivecs 10000
+${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k deep10M.ivecs 10000
 
 ## FAKE
 #data_path=/scratch/zpeng/fake
