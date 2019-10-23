@@ -1,10 +1,10 @@
 set(CMAKE_CXX_STANDARD 14)
 
 set(CXX_LIBRARY ${PROJECT_NAME})
-set(CUDA_LIBRARY ${PROJECT_NAME}_CUDA)
+#set(CUDA_LIBRARY ${PROJECT_NAME}_CUDA)
 
 set(CXX_OPTION -lboost -march=native -DINFO)
-set(CUDA_OPTION -lboost --compiler-options -march=native -DINFO)
+#set(CUDA_OPTION -lboost --compiler-options -march=native -DINFO)
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set(CXX_OPTION ${CXX_OPTION} -O0 -Wall -Wextra -pedantic -Werror)
 endif()
@@ -77,6 +77,6 @@ add_executable(profile_graph_degree_distribution profile_graph_degree_distributi
 target_compile_options(profile_graph_degree_distribution PRIVATE ${CXX_OPTION})
 target_link_libraries(profile_graph_degree_distribution PRIVATE ${CXX_LIBRARY} -ltcmalloc)
 
-add_executable(profile_cuda_test profile_cuda_test.cu)
-target_compile_options(profile_cuda_test PRIVATE ${CUDA_OPTION})
-target_link_libraries(profile_cuda_test PRIVATE ${CUDA_LIBRARY} -ltcmalloc)
+#add_executable(profile_cuda_test ../CUDA/main/profile_cuda_test.cu)
+#target_compile_options(profile_cuda_test PRIVATE ${CUDA_OPTION})
+#target_link_libraries(profile_cuda_test PRIVATE ${CUDA_LIBRARY} -ltcmalloc)

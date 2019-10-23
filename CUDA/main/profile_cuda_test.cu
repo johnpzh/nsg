@@ -10,7 +10,7 @@
 //#include <omp.h>
 //#include  "extras/utils.h"
 #include <stdio.h>
-#include "extras/index_cuda.cuh"
+#include "index_cuda.cuh"
 //// Ended by Johnpzh
 
 
