@@ -99,6 +99,19 @@ class IndexNSG : public Index {
             std::vector<unsigned> &tops);
     void DegreeDistribution(
             std::vector<unsigned> &degree_to_count);
+    void SearchWithOptGraphToRecordTrace(
+            const float *query,
+            const Parameters &parameters,
+            std::vector<unsigned> &trace_ids,
+            std::vector<float> &trace);
+    void SearchWithOptGraphAndTrace(
+            const float *query,
+            size_t K,
+            unsigned *trace_ids,
+            float *trace,
+            size_t trace_size,
+            const Parameters &parameters,
+            unsigned *indices);
 //    void SearchWithOptGraphOnCUDA(
 //            bool *d_switch);
 

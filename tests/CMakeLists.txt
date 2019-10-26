@@ -80,3 +80,7 @@ target_link_libraries(profile_graph_degree_distribution PRIVATE ${CXX_LIBRARY} -
 #add_executable(profile_cuda_test ../CUDA/main/profile_cuda_test.cu)
 #target_compile_options(profile_cuda_test PRIVATE ${CUDA_OPTION})
 #target_link_libraries(profile_cuda_test PRIVATE ${CUDA_LIBRARY} -ltcmalloc)
+
+add_executable(profile_search_on_recorded_trace profile_search_on_recorded_trace.cpp)
+target_compile_options(profile_search_on_recorded_trace PRIVATE ${CXX_OPTION})
+target_link_libraries(profile_search_on_recorded_trace PRIVATE ${CXX_LIBRARY} -ltcmalloc)

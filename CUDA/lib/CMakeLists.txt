@@ -1,1 +1,0 @@
-add_library(index_cuda ../src/index_cuda.cu)

@@ -4,6 +4,7 @@
 
 //#include "efanna2e/index_nsg.h"
 #include <stdio.h>
+#include "../include/index_cuda.cuh"
 namespace efanna2e {
 
 //__global__ void IndexNSG::SearchWithOptGraphOnCUDA(

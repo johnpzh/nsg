@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
 #project(efanna2e LANGUAGES CXX CUDA)
-project(searching LANGUAGES CXX CUDA)
+project(searching LANGUAGES CUDA CXX)
+enable_language(CUDA)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 

@@ -1945,4 +1945,196 @@ void IndexNSG::DegreeDistribution(
         ++degree_to_count[degree];
     }
 }
+
+/**
+ * Record the data trace when doing the searching.
+ * Then the trace could be used to do the ideal computation without graph traverse.
+ * @param query
+ * @param K
+ * @param parameters
+ * @param indices
+ * @param[out] trace Trace recorded
+ */
+void IndexNSG::SearchWithOptGraphToRecordTrace(
+        const float *query,
+        const Parameters &parameters,
+        std::vector<unsigned> &trace_ids,
+        std::vector<float> &trace)
+{
+    unsigned L = parameters.Get<unsigned>("L_search");
+    DistanceFastL2 *dist_fast = (DistanceFastL2 *) distance_;
+
+    std::vector <Neighbor> retset(L + 1); // Return set
+    std::vector<unsigned> init_ids(L); // Store initial candidates (vertex IDs)
+    // std::mt19937 rng(rand());
+    // GenRandom(rng, init_ids.data(), L, (unsigned) nd_);
+
+    boost::dynamic_bitset<> flags{nd_, 0};// Check flags
+    unsigned tmp_l = 0;
+    unsigned *neighbors = (unsigned *) (opt_graph_ + node_size * ep_ + data_len);
+    unsigned MaxM_ep = *neighbors;
+    neighbors++;
+
+    // Store ep_'s neighbors as candidates
+    for (; tmp_l < L && tmp_l < MaxM_ep; tmp_l++) {
+        init_ids[tmp_l] = neighbors[tmp_l];
+        flags[init_ids[tmp_l]] = true;
+    }
+
+    // If ep_'s neighbors are not enough, add other random vertices
+    // Added by Johnpzh
+    unsigned tmp_id = ep_ + 1; // use tmp_id to replace rand().
+    while (tmp_l < L) {
+        tmp_id %= nd_;
+        unsigned id = tmp_id++;
+        if (flags[id]) continue;
+        flags[id] = true;
+        init_ids[tmp_l] = id;
+        tmp_l++;
+    }
+    /////////////////////////////
+    //
+//        while (tmp_l < L) {
+//        unsigned id = rand() % nd_;
+//        if (flags[id]) continue;
+//        flags[id] = true;
+//        init_ids[tmp_l] = id;
+//        tmp_l++;
+//        }
+    //
+    /////////////////////////////
+    // Ended y Johnpzh
+
+    for (unsigned i = 0; i < init_ids.size(); i++) {
+        unsigned id = init_ids[i];
+        if (id >= nd_) continue;
+        _mm_prefetch(opt_graph_ + node_size * id, _MM_HINT_T0);
+    }
+    L = 0;
+    // Get the distances of all candidates, store in the set retset.
+    for (unsigned i = 0; i < init_ids.size(); i++) {
+        unsigned id = init_ids[i];
+        if (id >= nd_) continue;
+        float *x = (float *) (opt_graph_ + node_size * id);
+        {// Record the trace
+            trace_ids.push_back(id);
+            float *d = x;
+            for (unsigned loc = 0; loc < dimension_ + 1; ++loc) {
+                trace.push_back(*d++);
+            }
+        }
+        float norm_x = *x;
+        x++;
+        float dist = dist_fast->compare(x, query, norm_x, (unsigned) dimension_);
+//        {
+//            fprintf(stdout, "query: %f i: %u id: %u dist: %f\n", *query, i, id, dist);
+//        }
+        retset[i] = Neighbor(id, dist, true);
+        flags[id] = true;
+        L++;
+    }
+    // std::cout<<L<<std::endl;
+
+    std::sort(retset.begin(), retset.begin() + L);
+    uint32_t hops = 0;
+    int k = 0; // the index of the 1st unchecked vertices in retset.
+    while (k < (int) L) {
+        int nk = L; // the minimum insert location of new candidates
+
+        if (retset[k].flag) {
+            retset[k].flag = false;
+            unsigned n = retset[k].id;
+            ++hops;
+
+            _mm_prefetch(opt_graph_ + node_size * n + data_len, _MM_HINT_T0);
+            unsigned *ngbrs = (unsigned *) (opt_graph_ + node_size * n + data_len);
+            unsigned MaxM = *ngbrs;
+            ngbrs++;
+            for (unsigned m = 0; m < MaxM; ++m)
+                _mm_prefetch(opt_graph_ + node_size * ngbrs[m], _MM_HINT_T0);
+            for (unsigned m = 0; m < MaxM; ++m) {
+                unsigned id = ngbrs[m];
+                if (flags[id]) continue;
+                flags[id] = 1;
+                float *data = (float *) (opt_graph_ + node_size * id);
+                {// Record the trace
+                    trace_ids.push_back(id);
+                    float *d = data;
+                    for (unsigned loc = 0; loc < dimension_ + 1; ++loc) {
+                        trace.push_back(*d++);
+                    }
+                }
+                float norm = *data;
+                data++;
+                float dist = dist_fast->compare(query, data, norm, (unsigned) dimension_);
+//                {
+//                    fprintf(stdout, "query: %f id: %u dist: %f\n", *query, id, dist);
+//                }
+                if (dist >= retset[L - 1].distance) continue;
+                Neighbor nn(id, dist, true);
+                int r = InsertIntoPool(retset.data(), L, nn); // insert location
+
+                // if(L+1 < retset.size()) ++L;
+                if (r < nk) nk = r;
+            }
+        }
+        if (nk <= k) {
+            k = nk;
+        } else {
+            ++k;
+        }
+    }
+}
+
+/**
+ * According to trace, do the same computation but without graph traverse.
+ * @param query
+ * @param K
+ * @param trace_ids
+ * @param trace
+ * @param trace_size
+ * @param parameters
+ * @param indices
+ */
+void IndexNSG::SearchWithOptGraphAndTrace(
+        const float *query,
+        size_t K,
+        unsigned *trace_ids,
+        float *trace,
+        size_t trace_id_size,
+        const Parameters &parameters,
+        unsigned *indices)
+{
+    unsigned L = parameters.Get<unsigned>("L_search");
+    DistanceFastL2 *dist_fast = (DistanceFastL2 *) distance_;
+
+    std::vector <Neighbor> retset(L + 1); // Return set
+    size_t trace_i = 0;
+    for (unsigned i = 0; i < L; ++i) {
+        ++trace_i;
+        unsigned id = *trace_ids++;
+        float norm_x = *trace;
+        ++trace;
+        float dist = dist_fast->compare(query, trace, norm_x, (unsigned) dimension_);
+        trace += dimension_;
+        retset[i] = Neighbor(id, dist, true);
+    }
+
+    std::sort(retset.begin(), retset.begin() + L);
+    while (trace_i < trace_id_size) {
+        ++trace_i;
+        unsigned id = *trace_ids++;
+        float norm = *trace;
+        ++trace;
+        float dist = dist_fast->compare(query, trace, norm, (unsigned) dimension_);
+        trace += dimension_;
+        if (dist >= retset[L - 1].distance) continue;
+        Neighbor nn(id, dist, true);
+        InsertIntoPool(retset.data(), L, nn); // insert location
+    }
+    for (size_t i = 0; i < K; i++) {
+        indices[i] = retset[i].id;
+    }
+}
+
 } // namespace efanna2e
