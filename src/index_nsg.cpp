@@ -583,7 +583,10 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
         float *x = (float *) (opt_graph_ + node_size * id);
         float norm_x = *x;
         x++;
+//        time_distance_computation -= efanna2e::Utils::get_time_mark();
+//        ++count_distance_computation;
         float dist = dist_fast->compare(x, query, norm_x, (unsigned) dimension_);
+//        time_distance_computation += efanna2e::Utils::get_time_mark();
         retset[i] = Neighbor(id, dist, true);
         flags[id] = true;
         L++;
@@ -614,7 +617,10 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
                 float *data = (float *) (opt_graph_ + node_size * id);
                 float norm = *data;
                 data++;
+//                time_distance_computation -= efanna2e::Utils::get_time_mark();
+//                ++count_distance_computation;
                 float dist = dist_fast->compare(query, data, norm, (unsigned) dimension_);
+//                time_distance_computation += efanna2e::Utils::get_time_mark();
                 if (dist >= retset[L - 1].distance) continue;
                 Neighbor nn(id, dist, true);
                 int r = InsertIntoPool(retset.data(), L, nn); // insert location
@@ -2128,6 +2134,63 @@ void IndexNSG::SearchWithOptGraphAndTrace(
         ++trace;
         float dist = dist_fast->compare(query, trace, norm, (unsigned) dimension_);
         trace += dimension_;
+        if (dist >= retset[L - 1].distance) continue;
+        Neighbor nn(id, dist, true);
+        InsertIntoPool(retset.data(), L, nn); // insert location
+    }
+    for (size_t i = 0; i < K; i++) {
+        indices[i] = retset[i].id;
+    }
+}
+
+void IndexNSG::SearchWithOptGraphAndTrace(
+        const float *query,
+        size_t K,
+        char *trace,
+        size_t trace_id_size,
+        const Parameters &parameters,
+        unsigned *indices)
+{
+    unsigned L = parameters.Get<unsigned>("L_search");
+    DistanceFastL2 *dist_fast = (DistanceFastL2 *) distance_;
+
+    std::vector <Neighbor> retset(L + 1); // Return set
+    size_t trace_i = 0;
+    for (unsigned i = 0; i < L; ++i) {
+        ++trace_i;
+        unsigned id = *((unsigned *) trace);
+        trace += 4;
+        float norm_x = *((float *) trace);
+        trace += 4;
+//        time_distance_computation -= efanna2e::Utils::get_time_mark();
+//        ++count_distance_computation;
+        float dist = dist_fast->compare(query, (float *) trace, norm_x, (unsigned) dimension_);
+//        time_distance_computation += efanna2e::Utils::get_time_mark();
+        trace += 4 * dimension_;
+//        unsigned id = *trace_ids++;
+//        float norm_x = *trace;
+//        ++trace;
+//        trace += dimension_;
+        retset[i] = Neighbor(id, dist, true);
+    }
+
+    std::sort(retset.begin(), retset.begin() + L);
+    while (trace_i < trace_id_size) {
+        ++trace_i;
+        unsigned id = *((unsigned *) trace);
+        trace += 4;
+        float norm = *((float *) trace);
+        trace += 4;
+//        time_distance_computation -= efanna2e::Utils::get_time_mark();
+//        ++count_distance_computation;
+        float dist = dist_fast->compare(query, (float *) trace, norm, (unsigned) dimension_);
+//        time_distance_computation += efanna2e::Utils::get_time_mark();
+        trace += 4 * dimension_;
+//        unsigned id = *trace_ids++;
+//        float norm = *trace;
+//        ++trace;
+//        float dist = dist_fast->compare(query, trace, norm, (unsigned) dimension_);
+//        trace += dimension_;
         if (dist >= retset[L - 1].distance) continue;
         Neighbor nn(id, dist, true);
         InsertIntoPool(retset.data(), L, nn); // insert location

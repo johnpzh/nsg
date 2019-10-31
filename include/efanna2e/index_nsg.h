@@ -112,12 +112,19 @@ class IndexNSG : public Index {
             size_t trace_size,
             const Parameters &parameters,
             unsigned *indices);
+    void SearchWithOptGraphAndTrace(
+            const float *query,
+            size_t K,
+            char *trace,
+            size_t trace_id_size,
+            const Parameters &parameters,
+            unsigned *indices);
 //    void SearchWithOptGraphOnCUDA(
 //            bool *d_switch);
 
     // For profiling.
 //    double time_medoid;
-//    uint64_t count_distance_computation = 0;
+    uint64_t count_distance_computation = 0;
 //    double time_load_graph;
 //    double time_init_graph;
 //    double time_link;

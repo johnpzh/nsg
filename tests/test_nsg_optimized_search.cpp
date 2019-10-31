@@ -36,7 +36,7 @@ void load_data(char *filename, float *&data, unsigned &num,
 }
 
 void save_result(const char *filename,
-                 std::vector <std::vector<unsigned>> &results)
+                 std::vector<std::vector<unsigned>> &results)
 {
     std::ofstream out(filename, std::ios::binary | std::ios::out);
 
@@ -108,8 +108,8 @@ int main(int argc, char **argv)
             for (unsigned i = 0; i < query_num; i++) {
                 index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
             }
-                ///////////////////////////////
-                //
+            ///////////////////////////////
+            //
 //          auto s = std::chrono::high_resolution_clock::now(); // commented by Johnpzh
 //          for (unsigned i = 0; i < query_num; i++) {
 //            index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
@@ -123,6 +123,8 @@ int main(int argc, char **argv)
             {// Basic output
                 printf("L: %u "
                        "search_time(s.): %f "
+//                       "time_distance_computation: %f "
+//                       "count_distance_computation: %lu "
                        "K: %u "
                        "Volume: %u "
                        "Dimension: %u "
@@ -131,12 +133,16 @@ int main(int argc, char **argv)
                        "average_latency(ms.): %f\n",
                        L,
                        diff.count(),
+//                       index.time_distance_computation,
+//                       index.count_distance_computation,
                        K,
                        points_num,
                        dim,
                        query_num,
                        query_num / diff.count(),
                        diff.count() * 1000 / query_num);
+//                index.time_distance_computation = 0.0;
+//                index.count_distance_computation = 0;
             }
 
 //            printf("num_threads: %u "

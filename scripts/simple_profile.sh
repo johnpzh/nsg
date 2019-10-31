@@ -1,7 +1,10 @@
 #! /bin/bash
 
 # Do computation with trace so without graph traverse
-bin=/home/zpeng/pppp/clion/searching_mac/cmake-build-release/tests/profile_search_on_recorded_trace
+bin=/home/zpeng/pppp/clion/searching_mac/cmake-build-release/tests/test_nsg_optimized_search
+#bin=/home/zpeng/pppp/clion/searching_mac/cmake-build-release/tests/profile_search_to_record_trace
+bin_search=/home/zpeng/pppp/clion/searching_mac/cmake-build-release/tests/profile_search_on_recorded_trace
+
 
 # SIFT
 data_path=/scratch/zpeng/sift1m
@@ -11,6 +14,7 @@ l=200
 output=output.${data_name}.txt
 echo "---- ${data_path}/${data_name} ----"
 ${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 | tee ${output}
+${bin_search} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.trace.q-10000.binary | tee -a ${output}
 
 # GIST
 data_path=/scratch/zpeng/gist1m
@@ -20,6 +24,7 @@ l=400
 output=output.${data_name}.txt
 echo "---- ${data_path}/${data_name} ----"
 ${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 1000 | tee ${output}
+${bin_search} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 1000 ${data_path}/${data_name}.trace.q-1000.binary | tee -a ${output}
 
 # DEEP10M
 data_path=/scratch/zpeng/deep1b
@@ -29,6 +34,7 @@ l=400
 output=output.${data_name}.txt
 echo "---- ${data_path}/${data_name} ----"
 ${bin} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 | tee ${output}
+${bin_search} ${data_path}/${data_name}_base.fvecs ${data_path}/${data_name}_query.fvecs ${data_path}/${data_name}.nsg $l $k output.ivecs 10000 ${data_path}/${data_name}.trace.q-10000.binary | tee -a ${output}
 
 ## Graph Degree Distribution
 #bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/profile_graph_degree_distribution
