@@ -88,3 +88,7 @@ target_link_libraries(profile_search_on_recorded_trace PRIVATE ${CXX_LIBRARY} -l
 add_executable(profile_search_to_record_trace profile_search_to_record_trace.cpp)
 target_compile_options(profile_search_to_record_trace PRIVATE ${CXX_OPTION})
 target_link_libraries(profile_search_to_record_trace PRIVATE ${CXX_LIBRARY} -ltcmalloc)
+
+add_executable(app_search_in_batch app_search_in_batch.cpp)
+target_compile_options(app_search_in_batch PRIVATE ${CXX_OPTION})
+target_link_libraries(app_search_in_batch PRIVATE ${CXX_LIBRARY} -ltcmalloc)

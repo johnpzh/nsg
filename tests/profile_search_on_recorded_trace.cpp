@@ -165,29 +165,31 @@ int main(int argc, char **argv)
     paras.Set<unsigned>("P_search", L);
 
     // Record the trace
-//    std::vector<unsigned> trace_ids;
-//    std::vector<float> trace;
-//    std::vector<unsigned> trace_ids_sizes(query_num);
-
     {
         printf("Reading...\n");
     }
-    char *trace = nullptr;
-    size_t num_ids;
+    std::vector<unsigned> trace_ids;
+    std::vector<float> trace;
+    std::vector<unsigned> trace_ids_sizes(query_num);
     load_trace_file(
             argv[8],
+            trace_ids_sizes,
+            trace_ids,
             trace,
-            num_ids,
-            query_num,
             dim);
+
+//    char *trace = nullptr;
+//    size_t num_ids;
 //    load_trace_file(
 //            argv[8],
-//            trace_ids_sizes,
-//            trace_ids,
 //            trace,
+//            num_ids,
+//            query_num,
 //            dim);
+
     {
-        printf("num_ids: %lu\n", num_ids);
+//        printf("num_ids: %lu\n", num_ids);
+        printf("trace_ids.size(): %lu\n", trace_ids.size());
         printf("Computing...\n");
     }
     int num_threads_max = 1;
@@ -199,36 +201,36 @@ int main(int argc, char **argv)
         for (int warmup = 0; warmup < warmup_max; ++warmup) {
             std::vector<std::vector<unsigned>> res(query_num);
             for (unsigned i = 0; i < query_num; i++) res[i].resize(K);
-//            unsigned *trace_ids_ptr = trace_ids.data();
-//            float *trace_ptr = trace.data();
+            unsigned *trace_ids_ptr = trace_ids.data();
+            float *trace_ptr = trace.data();
             auto s = std::chrono::high_resolution_clock::now();
 //#pragma omp parallel for
-            size_t offset = 0;
+//            size_t offset = 0;
             for (unsigned i = 0; i < query_num; i++) {
 //                index.SearchWithOptGraph(query_load + i * dim, K, paras, res[i].data());
 
-                unsigned ids_count = *((unsigned *) (trace + offset));
-                offset += sizeof(unsigned);
-                index.SearchWithOptGraphAndTrace(
-                        query_load + i * dim,
-                        K,
-                        trace + offset,
-                        ids_count,
-                        paras,
-                        res[i].data());
-                offset += ids_count * (sizeof(unsigned) + (dim + 1) * sizeof(float));
-//                unsigned ids_count = trace_ids_sizes[i];
+//                unsigned ids_count = *((unsigned *) (trace + offset));
+//                offset += sizeof(unsigned);
 //                index.SearchWithOptGraphAndTrace(
 //                        query_load + i * dim,
 //                        K,
-//                        trace_ids_ptr,
-//                        trace_ptr,
+//                        trace + offset,
 //                        ids_count,
 //                        paras,
 //                        res[i].data());
-//                trace_ids_ptr += ids_count;
-//                trace_ptr += ids_count * (dim + 1);
-//                trace_ptr += trace_sizes[i];
+//                offset += ids_count * (sizeof(unsigned) + (dim + 1) * sizeof(float));
+
+                unsigned ids_count = trace_ids_sizes[i];
+                index.SearchWithOptGraphAndTrace(
+                        query_load + i * dim,
+                        K,
+                        trace_ids_ptr,
+                        trace_ptr,
+                        ids_count,
+                        paras,
+                        res[i].data());
+                trace_ids_ptr += ids_count;
+                trace_ptr += ids_count * (dim + 1);
             }
             // Ended by Johnpzh
             auto e = std::chrono::high_resolution_clock::now();
@@ -238,7 +240,7 @@ int main(int argc, char **argv)
                 printf("L: %u "
                        "search_time(s.): %f "
 //                       "time_distance_computation: %f "
-//                       "count_neighbors_hops: %lu "
+//                       "count_distance_computation: %lu "
                        "K: %u "
                        "Volume: %u "
                        "Dimension: %u "
@@ -264,6 +266,6 @@ int main(int argc, char **argv)
         }
     }
     free(query_load);
-    free(trace);
+//    free(trace);
     return 0;
 }

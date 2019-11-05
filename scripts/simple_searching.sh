@@ -1,6 +1,6 @@
 #! /bin/bash
 
-bin=/home/zpeng/benchmarks/clion/nsg_th107b4/cmake-build-release/tests/test_nsg_optimized_search
+bin=/home/zpeng/pppp/clion/searching_mac/cmake-build-release/tests/test_nsg_optimized_search
 
 # SIFT
 data_path=/scratch/zpeng/sift1m

@@ -72,8 +72,10 @@ int main(int argc, char **argv)
     }
     // Ended by Johnpzh
 
-    unsigned L = (unsigned) atoi(argv[4]);
-    unsigned K = (unsigned) atoi(argv[5]);
+    unsigned L = strtoull(argv[4], nullptr, 0);
+    unsigned K = strtoull(argv[5], nullptr, 0);
+//    unsigned L = (unsigned) atoi(argv[4]);
+//    unsigned K = (unsigned) atoi(argv[5]);
 
     if (L < K) {
         std::cout << "search_L cannot be smaller than search_K!" << std::endl;
@@ -124,7 +126,7 @@ int main(int argc, char **argv)
                 printf("L: %u "
                        "search_time(s.): %f "
 //                       "time_distance_computation: %f "
-//                       "count_distance_computation: %lu "
+                       "count_distance_computation: %lu "
                        "K: %u "
                        "Volume: %u "
                        "Dimension: %u "
@@ -134,7 +136,7 @@ int main(int argc, char **argv)
                        L,
                        diff.count(),
 //                       index.time_distance_computation,
-//                       index.count_distance_computation,
+                       index.count_distance_computation,
                        K,
                        points_num,
                        dim,
@@ -142,7 +144,7 @@ int main(int argc, char **argv)
                        query_num / diff.count(),
                        diff.count() * 1000 / query_num);
 //                index.time_distance_computation = 0.0;
-//                index.count_distance_computation = 0;
+                index.count_distance_computation = 0;
             }
 
 //            printf("num_threads: %u "

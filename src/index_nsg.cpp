@@ -559,13 +559,13 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
     }
     /////////////////////////////
     //
-//        while (tmp_l < L) {
+//    while (tmp_l < L) {
 //        unsigned id = rand() % nd_;
 //        if (flags[id]) continue;
 //        flags[id] = true;
 //        init_ids[tmp_l] = id;
 //        tmp_l++;
-//        }
+//    }
     //
     /////////////////////////////
     // Ended y Johnpzh
@@ -594,7 +594,6 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
     // std::cout<<L<<std::endl;
 
     std::sort(retset.begin(), retset.begin() + L);
-    uint32_t hops = 0;
     int k = 0; // the index of the 1st unchecked vertices in retset.
     while (k < (int) L) {
         int nk = L; // the minimum insert location of new candidates
@@ -602,7 +601,6 @@ void IndexNSG::SearchWithOptGraph(const float *query, size_t K,
         if (retset[k].flag) {
             retset[k].flag = false;
             unsigned n = retset[k].id;
-            ++hops;
 
             _mm_prefetch(opt_graph_ + node_size * n + data_len, _MM_HINT_T0);
             unsigned *ngbrs = (unsigned *) (opt_graph_ + node_size * n + data_len);
@@ -2121,7 +2119,9 @@ void IndexNSG::SearchWithOptGraphAndTrace(
         unsigned id = *trace_ids++;
         float norm_x = *trace;
         ++trace;
+//        time_distance_computation -= efanna2e::Utils::get_time_mark();
         float dist = dist_fast->compare(query, trace, norm_x, (unsigned) dimension_);
+//        time_distance_computation += efanna2e::Utils::get_time_mark();
         trace += dimension_;
         retset[i] = Neighbor(id, dist, true);
     }
@@ -2132,7 +2132,9 @@ void IndexNSG::SearchWithOptGraphAndTrace(
         unsigned id = *trace_ids++;
         float norm = *trace;
         ++trace;
+//        time_distance_computation -= efanna2e::Utils::get_time_mark();
         float dist = dist_fast->compare(query, trace, norm, (unsigned) dimension_);
+//        time_distance_computation += efanna2e::Utils::get_time_mark();
         trace += dimension_;
         if (dist >= retset[L - 1].distance) continue;
         Neighbor nn(id, dist, true);
@@ -2197,6 +2199,192 @@ void IndexNSG::SearchWithOptGraphAndTrace(
     }
     for (size_t i = 0; i < K; i++) {
         indices[i] = retset[i].id;
+    }
+}
+
+/**
+ * Prepare init_ids and flags, as they are constant for all queries.
+ * @param[out] init_ids
+ * @param[out] flags
+ * @param L
+ */
+void IndexNSG::PrepareInitIDs(
+        std::vector<unsigned> &init_ids,
+        boost::dynamic_bitset<> &flags,
+        unsigned L)
+{
+    unsigned *neighbors = (unsigned *) (opt_graph_ + node_size * ep_ + data_len);
+    unsigned MaxM_ep = *neighbors;
+    neighbors++;
+
+    // Store ep_'s neighbors as candidates
+    unsigned tmp_l = 0;
+    for (; tmp_l < L && tmp_l < MaxM_ep; tmp_l++) {
+        init_ids[tmp_l] = neighbors[tmp_l];
+        flags[init_ids[tmp_l]] = true;
+    }
+
+    // If ep_'s neighbors are not enough, add other random vertices
+    // Added by Johnpzh
+    unsigned tmp_id = ep_ + 1; // use tmp_id to replace rand().
+    while (tmp_l < L) {
+        tmp_id %= nd_;
+        unsigned id = tmp_id++;
+        if (flags[id]) continue;
+        flags[id] = true;
+        init_ids[tmp_l] = id;
+        tmp_l++;
+    }
+}
+
+
+/**
+ * Batched search, given query_load is already batched.
+ * @param query_load
+ * @param K
+ * @param parameters
+ * @param batch_start Query ID of the first query in the batch
+ * @param batch_size
+ * @param[out] indices_list
+ */
+void IndexNSG::SearchWithOptGraphInBatch(
+        const float *query_load,
+        size_t K,
+        const Parameters &parameters,
+        std::vector< std::vector<Neighbor> > &retset_list,
+        std::vector< boost::dynamic_bitset<> > &is_visited_list,
+        const std::vector<unsigned> &init_ids,
+        const boost::dynamic_bitset<> &flags,
+        unsigned batch_start,
+        unsigned batch_size,
+        std::vector< std::vector<unsigned> > &indices_list)
+{
+    unsigned L = parameters.Get<unsigned>("L_search");
+    DistanceFastL2 *dist_fast = (DistanceFastL2 *) distance_;
+
+//    std::vector< std::vector<Neighbor> > retset_list(batch_size, std::vector<Neighbor>(L + 1)); // Return set
+//    std::vector< boost::dynamic_bitset<> > is_visited_list(batch_size, boost::dynamic_bitset<>(nd_));// Check flags
+//    std::vector <Neighbor> retset(L + 1); // Return set
+//    std::vector<unsigned> init_ids(L); // Store initial candidates (vertex IDs)
+//    boost::dynamic_bitset<> flags{nd_, 0};// Check flags
+    { // Initialize retset_list
+//        std::vector<unsigned> init_ids(L);
+//        boost::dynamic_bitset<> flags(nd_);
+//        unsigned *neighbors = (unsigned *) (opt_graph_ + node_size * ep_ + data_len);
+//        unsigned MaxM_ep = *neighbors;
+//        neighbors++;
+//
+//        // Store ep_'s neighbors as candidates
+//        unsigned tmp_l = 0;
+//        for (; tmp_l < L && tmp_l < MaxM_ep; tmp_l++) {
+//            init_ids[tmp_l] = neighbors[tmp_l];
+//            flags[init_ids[tmp_l]] = true;
+//        }
+//
+//        // If ep_'s neighbors are not enough, add other random vertices
+//        // Added by Johnpzh
+//        unsigned tmp_id = ep_ + 1; // use tmp_id to replace rand().
+//        while (tmp_l < L) {
+//            tmp_id %= nd_;
+//            unsigned id = tmp_id++;
+//            if (flags[id]) continue;
+//            flags[id] = true;
+//            init_ids[tmp_l] = id;
+//            tmp_l++;
+//        }
+        // Ended y Johnpzh
+        // Copy array to list
+        for (unsigned q_i = 0; q_i < batch_size; ++q_i) {
+            is_visited_list[q_i] = flags;
+        }
+
+        for (unsigned i = 0; i < init_ids.size(); i++) {
+            unsigned id = init_ids[i];
+//            if (id >= nd_) continue;
+            _mm_prefetch(opt_graph_ + node_size * id, _MM_HINT_T0);
+        }
+//    L = 0;
+
+        for (unsigned q_i = 0; q_i < batch_size; ++q_i) {
+            // Get the distances of all candidates, store in the set retset.
+            const float *query = query_load + (q_i + batch_start) * dimension_;
+            for (unsigned i = 0; i < L; i++) {
+                unsigned id = init_ids[i];
+//                if (id >= nd_) continue;
+                float *x = (float *) (opt_graph_ + node_size * id);
+                float norm_x = *x;
+                x++;
+//                ++count_distance_computation;
+                float dist = dist_fast->compare(x, query, norm_x, (unsigned) dimension_);
+                retset_list[q_i][i] = Neighbor(id, dist, true);
+//                retset[i] = Neighbor(id, dist, true);
+//            flags[id] = true;
+//        L++;
+            }
+            std::sort(retset_list[q_i].begin(), retset_list[q_i].begin() + L);
+        }
+
+//        std::sort(retset.begin(), retset.begin() + L);
+    }
+
+    std::vector<unsigned> ks(batch_size, 0);
+//    bool not_finished = true;
+    boost::dynamic_bitset<> is_finished(batch_size);
+//    not_finished.flip(); // All set
+    while (!is_finished.all()) {
+        // Traverse all every query in the batch
+        for (unsigned q_i = 0; q_i < batch_size; ++q_i) {
+            if (is_finished[q_i]) {
+                continue;
+            }
+            const float *query = query_load + (q_i + batch_start) * dimension_;
+            auto &retset = retset_list[q_i];
+            unsigned k = ks[q_i];
+            unsigned nk = L;
+            if (retset[k].flag) {
+                retset[k].flag = false;
+                unsigned n = retset[k].id;
+
+                _mm_prefetch(opt_graph_ + node_size * n + data_len, _MM_HINT_T0);
+                unsigned *ngbrs = (unsigned *) (opt_graph_ + node_size * n + data_len);
+                unsigned MaxM = *ngbrs;
+                ngbrs++;
+                for (unsigned m = 0; m < MaxM; ++m)
+                    _mm_prefetch(opt_graph_ + node_size * ngbrs[m], _MM_HINT_T0);
+                for (unsigned m = 0; m < MaxM; ++m) {
+                    unsigned id = ngbrs[m];
+                    if (is_visited_list[q_i][id]) continue;
+                    is_visited_list[q_i][id] = true;
+                    float *data = (float *) (opt_graph_ + node_size * id);
+                    float norm = *data;
+                    data++;
+//                    ++count_distance_computation;
+                    float dist = dist_fast->compare(query, data, norm, (unsigned) dimension_);
+                    if (dist >= retset[L - 1].distance) continue;
+                    Neighbor nn(id, dist, true);
+                    unsigned r = InsertIntoPool(retset.data(), L, nn); // insert location
+
+                    // if(L+1 < retset.size()) ++L;
+                    if (r < nk) nk = r;
+                }
+            }
+            if (nk <= k) {
+                k = nk;
+            } else {
+                ++k;
+            }
+            if (k >= L) {
+                is_finished[q_i] = true;
+            } else {
+                ks[q_i] = k;
+            }
+        }
+    }
+
+    for (unsigned q_i = 0; q_i < batch_size; ++q_i) {
+        for (size_t k_i = 0; k_i < K; ++k_i) {
+            indices_list[q_i + batch_start][k_i] = retset_list[q_i][k_i].id;
+        }
     }
 }
 
